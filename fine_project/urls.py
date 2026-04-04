@@ -39,6 +39,7 @@ urlpatterns = [
          name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('menu/', views.menu_page, name='menu'),
+    path('feed/', views.feed_page, name='feed'),
     path('menu/event/create/', views.event_create_page, name='event_create'),
     path('menu/event/edit/<int:event_id>', views.event_edit_page, name='event_edit'),
     path('menu/event/commit/<int:event_id>', views.commit_event_page, name='event_commit'),

@@ -1,0 +1,61 @@
+{% extends 'base/base.html' %}
+
+{% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    <h3>Персональная лента рекомендаций</h3>
+
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            <select style="color: #000000;" name="entertainment_type" class="form-control form-control-sm">
+                <option style="color: #000000;" value="-1">Все рекомендации</option>
+                <option style="color: #000000;" value="0">Спортивные мероприятия</option>
+                <option style="color: #000000;" value="1">Встречи / сходки</option>
+                <option style="color: #000000;" value="2">Видеоигры</option>
+                <option style="color: #000000;" value="3">Развлечения</option>
+            </select>
+        </p>
+        <input class="btn btn-warning" type="submit" value="Фильтровать">
+    </form>
+
+    <hr>
+
+    {% if recommendations %}
+        <h5>Найдено рекомендаций: {{ recommendations_size }}</h5>
+        <div class="events-around">
+            {% for recommendation in recommendations %}
+                <div class="event">
+                    <img src="{% static 'images/default.png' %}" alt="event">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><h3>{{ recommendation.event.name }}</h3></li>
+                        <li class="list-group-item">
+                            <h6>
+                                {{ recommendation.event.author.first_name }} {{ recommendation.event.author.last_name }}
+                                <a href="{% url 'profile' code=recommendation.event.author.id %}" class="card-link">
+                                    @{{ recommendation.event.author.username }}
+                                </a>
+                            </h6>
+                        </li>
+                    </ul>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            {{ recommendation.event.description|truncatechars:60 }}
+                        </li>
+                        <li class="list-group-item">Рейтинг: {{ recommendation.score|floatformat:2 }}</li>
+                    </ul>
+                    <a class="event-button" href="{% url 'event' event_id=recommendation.event.id %}">Подробнее</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h4>Пока нет рекомендаций. Запусти их генерацию и обнови страницу.</h4>
+    {% endif %}
+{% endblock %}

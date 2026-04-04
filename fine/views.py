@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 
-from fine.models import User, Event, Friends, UserGroups, Report
+from fine.models import User, Event, Friends, UserGroups, Report, UserRecommendation
 from fine.forms import EditProfile, RegistrationForm, CreateEvent, SearchFriends, CreateGroup, \
     VerifyReportForm, CreateReportForm
 
@@ -109,6 +109,7 @@ def get_context(request: WSGIRequest = None, page_name="", active="") -> dict:
         data["menu"]["left"]["authorized"] = [
             {'url_name': reverse('index'), 'name': 'Главная страница'},
             {'url_name': reverse('menu'), 'name': 'Меню'},
+            {'url_name': reverse('feed'), 'name': 'Рекомендации'},
             {'url_name': reverse('friends'), 'name': 'Друзья'},
             {'url_name': reverse('search_friends'), 'name': 'Найти друга'},
         ]
@@ -149,9 +150,6 @@ def error_page(request: WSGIRequest):
     """
     context = get_context(request, "Error")
     return render(request, 'pages/does_not_found.html', context)
-
-
-@defense
 def menu_page(request: WSGIRequest):
     """
     Меню с мероприятиями
@@ -177,6 +175,28 @@ def menu_page(request: WSGIRequest):
                                                                               'entertainment_type'))
 
     return render(request, 'pages/start/menu.html', context)
+
+
+@defense
+@login_required
+def feed_page(request: WSGIRequest):
+    """
+    Персональная лента рекомендаций мероприятий.
+    """
+    context = get_context(request, "Рекомендации", reverse("feed"))
+
+    recommendations = UserRecommendation.objects.filter(
+        user=request.user
+    ).select_related("event", "event__author").order_by("rank")
+
+    if request.method == 'POST' and request.POST.get('entertainment_type') != '-1':
+        recommendations = recommendations.filter(
+            event__entertainment_type=request.POST.get('entertainment_type')
+        )
+
+    context["recommendations"] = recommendations
+    context["recommendations_size"] = recommendations.count()
+    return render(request, 'pages/main/feed.html', context)
 
 
 @defense
@@ -838,3 +858,5 @@ def verify_report_page(request, report_id):
             return redirect('/reports/unverifed_reports')
 
     return render(request, 'pages/reports/verify_report.html', context)
+
+
