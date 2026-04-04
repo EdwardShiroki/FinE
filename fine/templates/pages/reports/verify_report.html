@@ -1,0 +1,30 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% block content %}
+    <h1 class="mt-4">Жалоба №{{ id }}</h1>
+    <hr>
+    <div class="card">
+        <div class="card-header">
+            Жалоба №{{ id }}
+        </div>
+        <div class="card-body">
+            <h3>Описание проблемы: </h3>
+            <p class="card-text">{{ report.report_text }}</p>
+        </div>
+        <div class="card-footer text-muted">
+            Жалоба в обработке
+        </div>
+    </div>
+
+    <h1 class="mt-4">Ваш ответ</h1>
+    <hr>
+    <div class="row mt-3">
+        <div class="col">
+            <form method="post" class="myform-color">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                <button type="submit" class="btn btn-primary float-right btn-block">Отправить ответ</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

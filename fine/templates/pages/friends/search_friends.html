@@ -1,0 +1,51 @@
+{% extends 'base/base.html' %}
+
+{% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+    <form method="post" class="myform-color" action="{% url 'search_friends' %}">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <button type="submit" class="btn btn-primary float-right btn-block">Поиск</button>
+    </form>
+
+    {% if users_size == 0 %}
+        <div class="center-message">
+            <h1>Некого добавить в друзья</h1>
+        </div>
+    {% endif %}
+
+    {% if users_size > 0 %}
+        <h1>Пользователи:</h1>
+        <div class="card-around">
+            {% for i in users %}
+                <div class="mycard">
+                    {% if i.avatar %}
+                        <img class="card-img-top" src="{{ i.avatar.url }}" alt="Card image cap">
+                    {% else %}
+                        <img class="card-img-top" src="{% static 'images/default_avatar.png' %}" alt="Card image cap">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title for-tag">{{ i.first_name }} {{ i.last_name }}</h5>
+                        <a class="card-text card-link"
+                           href="{% url 'profile' code=i.id %}">@{{ i.username }}</a>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <button class="btn btn-success min_pad min_pad_btn special-margin w-100"
+                                    type="submit" value="{{ i.id }}" name="friend_button">Добавить в друзья
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

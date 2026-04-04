@@ -1,0 +1,148 @@
+.dark .gradient-background:before {
+    /*background: linear-gradient(bottom left, #000033, #8b00ff);*/
+    opacity: 1;
+}
+
+.dark .index-gradient {
+    background-image: radial-gradient(circle, #FF6700 0%, #8b00ff 100%);
+    /*opacity: 1;*/
+}
+
+.dark .mycontainer {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+.dark * {
+    color: #FFFFFF;
+}
+
+.dark .black-color-text {
+    color: #000000;
+}
+
+.dark .tabs > div > label {
+    background-color: #273247;
+}
+
+.dark .tabs > div > input[type="radio"]:checked + label {
+    background-color: #8b00ff;
+    color: #FFFFFF;
+}
+
+.dark .mycard {
+    background-color: #273247;
+    border-color: #333333;
+}
+
+.dark .dark-mycard {
+    background-color: #000000;
+    border-color: #FF6700;
+    color: #FFFFFF;
+}
+
+.dark .event-gradient {
+    background-image: linear-gradient(45deg, #8b00ff 0%, #FF6700 100%);
+}
+
+.dark .event,
+.dark .event > img {
+    background-color: #000000;
+    border-color: #FF6700;
+}
+
+.dark .event .list-group,
+.dark .event .list-group-item {
+    background-color: #000000;
+}
+
+.dark .event-button {
+    background-color: #8b00ff;
+}
+
+.dark .event-button:hover {
+    background-color: #FF6700;
+}
+
+.dark .mycard > img {
+    border-color: #333333;
+}
+
+.dark .myform-color > .profile-info-box > p > input,
+.dark .card-link {
+    color: #8b00ff;
+}
+
+.dark .btn-primary {
+    background-color: #8b00ff;
+    border-color: #8b00ff;
+}
+
+.dark .btn-primary:hover {
+    background-color: #7200C9;
+    border-color: #7200C9;
+}
+
+
+.dark .btn-primary.active,
+.dark .btn-outline-primary.active {
+    background-color: #59009C;
+    border-color: #59009C;
+}
+
+.dark .btn-outline-primary {
+    border-color: #8b00ff;
+    color: #8b00ff;
+}
+
+.dark .btn-outline-primary:hover {
+    background-color: #8b00ff;
+    color: #FFFFFF;
+}
+
+.dark .outline:hover {
+    color: #FFFFFF;
+    background-color: var(--backgroung-color);
+    border-color: var(--backgroung-color);
+}
+
+.dark .myform-color > .profile-info-box > h1 > input,
+.dark .myform-color > .profile-info-box > h5 > input,
+.dark .myform-color > div > input,
+.dark .myform-color > div > select,
+.dark .myform-color > div > select > option,
+.dark .myform-color > div > textarea {
+    color: #000000;
+}
+
+.dark * {
+    --scrollbarBg: linear-gradient(180deg, #8b00ff 0%, #c8328a 50%, #8b00ff 100%);
+    --scrollbarThumb: rgba(255, 255, 255, 0.5);
+}
+
+.dark .modal-body {
+    background-color: #000033;
+}
+
+
+.dark .card,
+.dark .card > ul > li,
+.dark .modal-content,
+.dark .modal-header,
+.dark .modal-footer {
+    background-color: #273247;
+}
+
+
+.dark .myprimary {
+    --backgroung-color: #8b00ff;
+    background-color: var(--backgroung-color);
+    color: #FFFFFF;
+}
+
+.dark .outline {
+    padding: 8px 13px;
+    background: none;
+    color: var(--backgroung-color);
+    border: 2px solid;
+    font-weight: bold;
+}

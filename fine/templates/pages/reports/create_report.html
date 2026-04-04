@@ -1,0 +1,21 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% block content %}
+    <h1 class="mt-4">Создание Жалобы/Вопроса:</h1>
+    <hr>
+
+     <div class="row mt-3">
+            <div class="col">
+              <form method="post" class="myform-color" action="{% url 'create_report' %}">
+                      {% csrf_token %}
+                      <div class="mb-3">
+                        <label for="report_text" class="form-label"></label>
+                        <input type="text" class="form-control" id="report_text" name="report_text" required placeholder="Развёрнуто опишите Вашу проблему.">
+                      </div>
+                  {% buttons %}
+                    <button type="submit" class="btn btn-primary float-right btn-block">Отправить</button>
+                  {% endbuttons %}
+              </form>
+            </div>
+       </div>
+{% endblock %}

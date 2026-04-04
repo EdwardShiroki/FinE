@@ -1,0 +1,91 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    <div class="center-message index-gradient" style="width: 100%; min-height: calc(77vh - 3vw);">
+        <div>
+            <div class="center-message">
+                <h1 style="font-size: 96px; color: #FFFFFF;">FinE</h1>
+            </div>
+            {% if not request.user.is_authenticated %}
+                <a href="{% url 'register' %}" class="mybtn myprimary" style="margin-right: 5px;">Регистрация</a>
+                <a href="{% url 'login' %}" class="mybtn myprimary outline">Авторизация</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="container" style="margin-top: 40px; margin-bottom: 40px;">
+        <div class="row justify-content-md-center">
+            <div class="col-md-auto dark-mycard">
+                Интересные события в городе
+            </div>
+            <div class="col-md-auto dark-mycard">
+                Новые знакомства
+            </div>
+        </div>
+        <div class="row justify-content-md-center">
+            <div class="col-md-auto dark-mycard">
+                Приятные встречи
+            </div>
+        </div>
+        <div class="row justify-content-md-center">
+            <div class="col-md-auto dark-mycard">
+                Встречи друзей
+            </div>
+            <div class="col-md-auto dark-mycard">
+                Удобная организация
+            </div>
+        </div>
+    </div>
+    <h3 style="margin: 0 0 40px 5px;">Популярные ивенты:</h3>
+    <div class="events-around">
+        {% for event in events %}
+            <div class="event">
+                <img src="{% static 'images/default.png' %}" alt="...">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><h3>{{ event.name }}</h3></li>
+                    <li class="list-group-item">
+                        <h6>
+                            {{ event.author.first_name }} {{ event.author.last_name }} <a
+                                href="{% url 'profile' code=event.author.id %}"
+                                class="card-link">@{{ event.author.username }}</a></h6></li>
+                </ul>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description }}
+                    </li>
+                </ul>
+                <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
+            </div>
+        {% endfor %}
+        <a class="event" style="text-align: center; padding: 0; border: 0;" href="menu/">
+            <div class="center-message event-gradient">
+                <h4 style="color: #FFFFFF; width: 50%">Увидеть больше</h4>
+            </div>
+        </a>
+    </div>
+    <div class="center-message" style="width: 100%; min-height: calc(77vh - 3vw - 200px);">
+        <div>
+            <div class="center-message">
+                <h3 style="text-align: center; margin: 100px 0 50px 0;">Расширяйте свой
+                    круг
+                    общения без стресса,
+                    связанного с логистикой, организацией или координацией, используя FinE. Легко собирайтесь и
+                    общайтесь с
+                    единомышленниками, стройте прочные связи на всю жизнь.
+                </h3>
+            </div>
+            {% if not request.user.is_authenticated %}
+                <div class="center-message">
+                    <a href="{% url 'register' %}" class="mybtn myprimary" style="margin-right: 5px;">Регистрация</a>
+                    <a href="{% url 'login' %}" class="mybtn myprimary outline">Авторизация</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

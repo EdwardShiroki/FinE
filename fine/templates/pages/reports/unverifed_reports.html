@@ -1,0 +1,31 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% block content %}
+    <h1 class="mt-4">Непроверенные жалобы</h1>
+    <hr>
+    {% if reports_size > 0 %}
+      <table class="table table-dark table-striped">
+            <thead>
+                <tr>
+                  <th scope="col">ID:</th>
+                  <th scope="col">Дата создания:</th>
+                  <th scope="col">Автор: </th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                    <tr>
+                      <th scope="row">{{report.id}}</th>
+                      <td>{{report.created_at}}</td>
+                      <td>{{report.author}}</td>
+                        <td><a href="{% url 'verify_report' report.id %}" class="btn btn-primary float-right btn-block">Проверить</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+      </table>
+    {% endif %}
+    {% if reports_size == 0 %}
+        <p>Жалоб нет, Вы молодцы!</p>
+    {% endif %}
+{% endblock %}

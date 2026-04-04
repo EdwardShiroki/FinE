@@ -1,0 +1,174 @@
+* {
+    transition: 0.5s ease color, background-color, background;
+    color: #000000;
+}
+
+
+body {
+    height: 100vh;
+}
+
+.gradient-background {
+    /*background: linear-gradient(bottom left, #3931af, #00c6ff);*/
+    /*background:  linear-gradient(45deg, #3931af 0%, #00c6ff 100%);*/
+    /*background: -webkit-linear-gradient(bottom left, #000033, #8b00ff);*/
+    background-image: linear-gradient(45deg, #3931af 0%, #00c6ff 100%);
+    z-index: 100;
+}
+
+.gradient-background:before {
+    background-image: linear-gradient(45deg, #000033 0%, #8b00ff 100%);
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    /*height: 100vh;*/
+    /*width: 100vw;*/
+    z-index: -100;
+    transition: opacity 0.5s;
+}
+
+.full-screen {
+    height: 94%;
+    width: 94%;
+}
+
+.footer {
+    padding: 1vw;
+    background: #fff;
+    margin-top: 2vh;
+    border-radius: 0.5rem;
+    height: 7vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 1vw;
+    background: #fff;
+    margin-top: 2vh;
+    border-radius: 0.5rem;
+}
+
+.card-link {
+    color: rgb(13, 110, 253);
+}
+
+.myform-color > .profile-info-box > p > input{
+    color: rgb(13, 110, 253);
+}
+
+.borders {
+    display: flex;
+    padding: 1.5vw;
+    background: #fff;
+    margin-top: 2vh;
+    border-radius: 0.5rem;
+    min-height: 77vh;
+    max-height: 77vh;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80vw;
+}
+
+* {
+    --scrollbarBg: linear-gradient(180deg, #3931af 0%, #00c6ff 50%, #3931af 100%);
+    --scrollbarThumb: rgba(0, 0, 0, 0.5);
+    --scrollbarWidth: 12px;
+    --scrollbarBorder: 3px solid var(--scrollbarBg);
+    --scrollbarBorderRadius: calc(var(--scrollbarWidth) / 2);
+}
+
+.center-message {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.np {
+    display: flex;
+    flex-direction: column;
+    justify-items: stretch;
+    padding: 0 0 0 0;
+    scrollbar-width: var(--scrollbarWidth);
+    scrollbar-color: var(--scrollbarThumb) var(--scrollbarBg);
+}
+
+*::-webkit-scrollbar {
+    width: var(--scrollbarWidth);
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--scrollbarBg);
+    border-radius: var(--scrollbarBorderRadius);
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbarThumb);
+    border-radius: var(--scrollbarBorderRadius);
+    border: var(--scrollbarBorder);
+}
+
+.mycontainer {
+    width: 80vw;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgba(255, 255, 255, 0.75);
+    /*background-color: rgba(0, 0, 0, 0.75);*/
+}
+
+a {
+    text-decoration: none;
+}
+
+.theme-change-button {
+    transition: 0.1s linear color, background-color, background;
+    width: 68px;
+    height: 68px;
+    border-radius: 0.5rem;
+    margin-left: 2vh;
+    margin-right: 0;
+    margin-top: 2vh;
+    padding: 1vw;
+    cursor: pointer;
+}
+
+
+.mybtn {
+    display: inline-block;
+    border-radius: 1.5rem;
+    text-align: center;
+    padding: 10px 15px;
+}
+
+.myprimary {
+    --backgroung-color: rgb(13, 110, 253);
+    background-color: var(--backgroung-color);
+    color: #FFFFFF;
+}
+
+.myprimary:hover {
+    --backgroung-color: rgb(13, 110, 253);
+    color: #FFFFFF;
+}
+
+.outline {
+    padding: 8px 13px;
+    background: none;
+    border: 2px solid;
+    color: var(--backgroung-color);
+    font-weight: bold;
+}
+
+.outline:hover {
+    color: #FFFFFF;
+    background-color: var(--backgroung-color);
+    border-color: var(--backgroung-color);
+}
+

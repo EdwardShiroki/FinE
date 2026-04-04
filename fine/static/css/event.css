@@ -1,0 +1,19 @@
+.object{
+    position: relative;
+}
+
+.second-form-group{
+  position: relative;
+  top: 400px;
+}
+
+.map {
+  width: 80%;
+  height: 400px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 10;
+}

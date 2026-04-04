@@ -1,0 +1,103 @@
+{% extends 'base/base.html' %}
+
+{% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <p><select style="color: #000000;" name="entertainment_type" class="form-control form-control-sm">
+            <option style="color: #000000;" value="-1">Все мероприятия</option>
+            <option style="color: #000000;" value="0">Спортивное мероприятие</option>
+            <option style="color: #000000;" value="1">Встреча / Сходка</option>
+            <option style="color: #000000;" value="2">Видеоигры</option>
+            <option style="color: #000000;" value="3">Развлечния (Фильм / Театр и т.п.)</option>
+        </select></p>
+        <input class="btn btn-warning" type="submit" value="Фильтровать">
+    </form>
+    <h3 class="text-center">Есть идеи для своего мероприятия?</h3>
+    <div class="d-grid gap-2 col-6 mx-auto">
+        <a href="event/create/" class="btn btn-success" type="button">Реализуйте!</a>
+    </div>
+    <hr>
+
+    {% if events %}
+        <h3>Мероприятия в вашем городе: </h3>
+        <div class="events-around">
+            {% for event in events %}
+                <div class="event">
+                    <img src="{% static 'images/default.png' %}" alt="...">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><h3>{{ event.name }}</h3></li>
+                        <li class="list-group-item">
+                            <h6>
+                                {{ event.author.first_name }} {{ event.author.last_name }} <a
+                                    href="{% url 'profile' code=event.author.id %}"
+                                    class="card-link">@{{ event.author.username }}</a></h6></li>
+                    </ul>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description | truncatechars:20 }}
+                        </li>
+                    </ul>
+                    <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h3>Мероприятий не планируется.</h3>
+    {% endif %}
+    <hr>
+{% if user.is_authenticated %}
+    {% if private_events %}
+        <h3>Ваши приватные мероприятия: </h3>
+        <div class="events-around">
+            {% for event in my_private_events %}
+                <div class="event">
+                    <img src="{% static 'images/default.png' %}" alt="...">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><h3>{{ event.name }}</h3></li>
+                        <li class="list-group-item">
+                            <h6>
+                                {{ event.author.first_name }} {{ event.author.last_name }} <a
+                                    href="{% url 'profile' code=event.author.id %}"
+                                    class="card-link">@{{ event.author.username }}</a></h6></li>
+                    </ul>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description | truncatechars:20 }}
+                        </li>
+                    </ul>
+                    <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
+                </div>
+            {% endfor %}
+            {% for event in private_events %}
+                <div class="event">
+                    <img src="{% static 'images/default.png' %}" alt="...">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><h3>{{ event.name }}</h3></li>
+                        <li class="list-group-item">
+                            <h6>
+                                {{ event.author.first_name }} {{ event.author.last_name }} <a
+                                    href="{% url 'profile' code=event.author.id %}"
+                                    class="card-link">@{{ event.author.username }}</a></h6></li>
+                    </ul>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description | truncatechars:20 }}
+                        </li>
+                    </ul>
+                    <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h3>У Вас не планируются приватные мероприятия.</h3>
+    {% endif %}
+{% endif %}
+{% endblock %}

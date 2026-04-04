@@ -1,0 +1,59 @@
+{% extends 'base/base.html' %}
+
+{% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data" class="profile-around myform-color">
+        {% csrf_token %}
+        {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" class="profile-icon">
+        {% else %}
+            <img src="{% static 'images/default_avatar.png' %}" class="profile-icon">
+        {% endif %}
+        <div class="file profile-edit-btn">
+            <input type="checkbox" name="avatar-clear" id="avatar-clear_id">
+            <span>Change Avatar</span>
+            <input type="file" name="avatar" accept="image/*" id="id_avatar">
+        </div>
+        <div class="profile-info-box">
+            <h1 style="font-size: 50px;">
+                <input type="text"
+                       class="form-control"
+                       style="display: inline-block; width: 48%; font-size: 50px;"
+                       name="first_name"
+                       value="{{ request.user.first_name }}"
+                       maxlength="150" required
+                       id="id_first_name"> <input type="text"
+                                                  class="form-control"
+                                                  style="display: inline-block; width: 48%; font-size: 50px;"
+                                                  name="last_name"
+                                                  value="{{ request.user.last_name }}"
+                                                  maxlength="150" required
+                                                  id="id_last_name"></h1>
+            <p class="card-link"
+               style="margin-top: -10px; font-size: 25px;">
+                @<input type="text"
+                        class="form-control"
+                        style="display: inline-block; width: 80%;"
+                        name="username"
+                        value="{{ request.user.username }}" maxlength="150"
+                        required id="id_username">
+            </p>
+            <p style="color: #6c757d;">Зарегистрирован с {{ user.date_joined.date }}</p>
+            <h5>Email: <input type="email"
+                              class="form-control profile-info-email"
+                              style="display:inline-block; width: 80%;"
+                              name="email"
+                              value="{{ request.user.email }}"
+                              maxlength="254" required id="id_email">
+            </h5>
+            <div style="display:block; height: 100%;"></div>
+            <button type="submit" class="btn btn-primary btn-lg profile-edit-btn">Сохранить изменения</button>
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% block content %}
+    <h1 class="mt-4">Количество ваших жалоб: {{reports_size}}</h1>
+    {% if waiting_reports > 0 %}
+    <h2 class="mt-4">Проверено: {{waiting_reports}}</h2>
+    {% endif %}
+    <hr>
+    <a type="button" class="btn btn-danger btn-lg btn-block" href="{% url 'create_report' %}">Создать Жалобу</a>
+    <hr>
+    {% if reports_size > 0 %}
+      <table class="table">
+            <thead>
+                <tr>
+                  <th scope="col">ID:</th>
+                  <th scope="col">Дата создания:</th>
+                  <th scope="col">Статус:</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                    <tr>
+                      <th scope="row">{{report.id}}</th>
+                      <td>{{report.created_at}}</td>
+                      <td>{% if report.type == 1 %}В обработке{% endif %}{% if report.type == 2 %}Проверено{% endif %}</td>
+                        <td><a href="report/{{report.id}}" class="btn btn-primary float-right btn-block">Перейти к жалобе</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+      </table>
+    {% endif %}
+{% endblock %}

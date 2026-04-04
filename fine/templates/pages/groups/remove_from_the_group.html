@@ -1,0 +1,52 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% load static %}
+{% block extra_css %}
+
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    <form method="post" action="{% url 'remove_from_the_group'  group_id %}">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <button type="submit" class="btn btn-primary float-right btn-block">Поиск</button>
+    </form>
+    {% if users_size == 0 %}
+        <div class="center-message">
+            <h1>Из группы некого удалить</h1>
+        </div>
+    {% endif %}
+    {% if users_size > 0 %}
+        <h1>Люди, состоящие в группе:</h1>
+        <div class="container">
+            <div class="row">
+                {% for i in users %}
+                    <div class="col-md-4">
+                        <div class="card" style="width: 18rem;">
+                            {% if i.avatar %}
+                                <img class="card-img-top" src="{{ i.avatar.url }}" alt="Card image cap">
+                            {% endif %}
+                            {% if not i.avatar %}
+                                <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
+                                     alt="Card image cap">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ i.username }}</h5>
+                                <p class="card-text">{{ i.first_name }} {{ i.last_name }}</p>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary" value="{{ i.id }}" name="delete">
+                                        Удалить
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% load static %}
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+<form method='post'>
+    {% csrf_token %}
+    <ul id="id">
+      <li><label for="id_countries_0"><input class="fff" id="id_countries_0" name="countries" type="checkbox" value="AUT"> Austria</label></li>
+
+      <li><label for="id_countries_1"><input class="fff" id="id_countries_1" name="countries" type="checkbox" value="DEU"> Germany</label></li>
+
+      <li><label for="id_countries_2"><input class="fff" id="id_countries_2" name="countries" type="checkbox" value="NLD"> Neitherlands</label></li>
+    </ul>
+    <button type='submit' class="btn btn-primary btn-lg" value='submit'>Сохранить изменения</button>
+</form>
+{{interests}}
+{{cur_interests}}
+
+{% endblock %}

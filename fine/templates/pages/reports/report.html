@@ -1,0 +1,29 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% block content %}
+    <h1 class="mt-4">Жалоба №{{id}}</h1>
+    <hr>
+    <div class="card">
+      <div class="card-header">
+        Жалоба №{{id}}
+      </div>
+      <div class="card-body">
+          <h3>Ваша жалоба: </h3>
+          <p class="card-text">{{report.report_text}}</p>
+          {% if report_type == 2 %}
+            <h3>Ответ разработчика: </h3>
+          <p class="card-text">{{report.answer_text}}</p>
+        {% endif %}
+      </div>
+        {% if report_type == 1 %}
+            <div class="card-footer text-muted">
+                Жалоба в обработке
+            </div>
+        {% endif %}
+        {% if report_type == 2 %}
+            <div class="card-footer text-muted">
+                Жалоба проверена {{report.closed_at}}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

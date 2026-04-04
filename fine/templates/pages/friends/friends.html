@@ -1,0 +1,163 @@
+{% extends 'base/base.html' %}
+
+{% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/table.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="tabs">
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5vh; padding-bottom: 1.5vh;">
+            <input type="radio" name="tab-btn" id="tab-btn-1" value="" checked>
+            {% if friends_size == 0 %}
+                <label for="tab-btn-1">
+                    <span style="display: flex; align-items: center; height: 100%;">Мои друзья </span>
+                </label>
+            {% else %}
+                <label for="tab-btn-1">
+                <span style="display: flex; align-items: center; height: 100%;">Мои друзья <span
+                        class="badge bg-info" style="margin-left: 5px;">{{ friends_size }}</span>
+                </span>
+                </label>
+            {% endif %}
+            <input type="radio" name="tab-btn" id="tab-btn-2" value="">
+            {% if friends_request_to_user_size == 0 %}
+                <label for="tab-btn-2">
+                    <span style="display: flex; align-items: center; height: 100%;">Запросы на дружбу </span>
+                </label>
+            {% else %}
+                <label for="tab-btn-2">
+                <span style="display: flex; align-items: center; height: 100%;">Запросы на дружбу <span
+                        class="badge bg-danger" style="margin-left: 5px;">{{ friends_request_to_user_size }}</span>
+                </span>
+                </label>
+            {% endif %}
+            <input type="radio" name="tab-btn" id="tab-btn-3" value="">
+            {% if friends_request_by_user_size == 0 %}
+                <label for="tab-btn-3">
+                    <span style="display: flex; align-items: center; height: 100%;">Мои запросы </span>
+                </label>
+            {% else %}
+                <label for="tab-btn-3">
+                <span style="display: flex; align-items: center; height: 100%;">Мои запросы <span
+                        class="badge bg-secondary" style="margin-left: 5px;">{{ friends_request_by_user_size }}</span>
+                </span>
+                </label>
+            {% endif %}
+        </div>
+        <div id="content-1">
+            {% if friends_size == 0 %}
+                <div class="center-message">
+                    <h3>У Вас нет друзей.</h3>
+                </div>
+            {% else %}
+                <div class="card-around">
+                    {% for i in friends %}
+                        <div class="mycard">
+                            {% if i.from_user.avatar %}
+                                <img src="{{ i.from_user.avatar.url }}" alt="Card image cap">
+                            {% else %}
+                                <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
+                                     alt="Card image cap">
+                            {% endif %}
+                            <div class="card-body" style="padding-bottom: 0;">
+                                <h5 class="card-title for-tag">{{ i.from_user.first_name }} {{ i.from_user.last_name }}</h5>
+                                <a class="card-text card-link"
+                                   href="{% url 'profile' code=i.from_user.id %}">@{{ i.from_user.username }}</a>
+                            </div>
+                            <div class="card-body min_pad">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger w-100 min_pad_btn" type="submit" value="{{ i.id }}"
+                                            name="del_friend">Удалить
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div id="content-2">
+            {% if friends_request_to_user_size == 0 %}
+                <div class="center-message">
+                    <h3>Нет отправленных пользователю запросов на дружбу.</h3>
+                </div>
+            {% else %}
+                <div class="card-around">
+                    {% for i in friends_request_to_user %}
+                        <div class="mycard">
+                            {% if i.from_user.avatar %}
+                                <img src="{{ i.from_user.avatar.url }}" alt="Card image cap">
+                            {% else %}
+                                <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
+                                     alt="Card image cap">
+                            {% endif %}
+                            <div class="card-body" style="padding-bottom: 0;">
+                                <h5 class="card-title for-tag">{{ i.from_user.first_name }} {{ i.from_user.last_name }}</h5>
+                                <a class="card-text card-link"
+                                   href="{% url 'profile' code=i.from_user.id %}">@{{ i.from_user.username }}</a>
+                            </div>
+                            <div class="card-body min_pad">
+                                <form method="post" class="myform">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            value="{{ i.id }}"
+                                            name="accept_from_request"
+                                            class="btn btn-success min_pad min_pad_btn special-margin">Accept
+                                    </button>
+                                    <button type="submit"
+                                            value="{{ i.id }}"
+                                            name="cancel_from_request"
+                                            class="btn btn-danger min_pad min_pad_btn">Cancel
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div id="content-3">
+            {% if friends_request_by_user_size == 0 %}
+                <div class="center-message">
+                    <h3>Нет отправленных пользователем запросов на дружбу.</h3>
+                </div>
+            {% else %}
+                <div class="card-around">
+                    {% for i in friends_request_by_user %}
+                        <div class="mycard">
+                            {% if i.to_user.avatar %}
+                                <img src="{{ i.to_user.avatar.url }}" alt="Card image cap">
+                            {% else %}
+                                <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
+                                     alt="Card image cap">
+                            {% endif %}
+                            <div class="card-body" style="padding-bottom: 0;">
+                                <h5 class="card-title for-tag">{{ i.to_user.first_name }} {{ i.to_user.last_name }}</h5>
+                                <a class="card-text card-link"
+                                   href="{% url 'profile' code=i.to_user.id %}">@{{ i.to_user.username }}</a>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger w-100 min_pad_btn" type="submit" value="{{ i.id }}" name="cancel_to_request">Cancel
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tabs.js' %}"></script>
+{% endblock %}

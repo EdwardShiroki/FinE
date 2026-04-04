@@ -1,0 +1,26 @@
+version: '2'
+services:
+  db:
+    image: bitnami/postgresql:latest
+    hostname: db
+    volumes:
+      - 'fine_db:/bitnami/postgresql'
+    environment:
+      - POSTGRES_USER=chudo
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mydb
+
+  back:
+    image: urtanto/fine:latest
+    hostname: back
+    volumes:
+      - '/var/media:/proj/media'
+      - '/var/static:/proj/fine/static'
+    ports:
+      - "8001:8000"
+    links:
+      - db
+    depends_on:
+      - db
+volumes:
+  fine_db:

@@ -1,0 +1,78 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% load static %}
+
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
+{% endblock %}
+
+{% block content %}
+{% if action == "watch" %}
+
+    {% if groups %}
+    <h5>Группы, в которых вы состоите: </h5>
+        <div class="row">
+            {% for group in groups %}
+                <div class="col-md-4">
+                    <div class="card" style="width: 18rem;">
+                      <div class="card-body">
+                        <h5 class="card-title">{{group.title}}</h5>
+                        <p class="card-text">{{group.description | truncatechars:20}}</p>
+                        <a href="{% url 'group' group.id %}" class="d-grid gap-2 col-6 mx-auto btn btn-primary">{{buttons}}</a>
+                      </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    <hr>
+    {% else %}
+    <h5>Вы не состоите в группах.</h5>
+    <hr>
+    {% endif %}
+
+    {% if my_groups %}
+    <h5>Группы, которыми вы владете: </h5>
+        <div class="row">
+            {% for group in my_groups %}
+                <div class="col-md-3">
+                    <div class="card" style="width: 18rem;">
+                      <div class="card-body">
+                        <h5 class="card-title">{{group.title}}</h5>
+                        <p class="card-text">{{group.description | truncatechars:20}}</p>
+                        <a href="{% url 'group' group.id %}" class="d-grid gap-2 col-6 mx-auto btn btn-primary">{{buttons}}</a>
+                      </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+    <h5>У Вас нет групп.</h5>
+    {% endif %}
+
+    <hr>
+    <a href="create_group" class="d-grid gap-2 btn btn-primary" type="button">Создать Группу</a>
+{% endif %}
+{% if action == "invite" %}
+
+    {% if my_groups %}
+    <h5>Группы, которыми вы владете: </h5>
+        <div class="row">
+            {% for group in my_groups %}
+                <div class="col-md-3">
+                    <div class="card" style="width: 18rem;">
+                      <div class="card-body">
+                        <h5 class="card-title">{{group.title}}</h5>
+                        <p class="card-text">{{group.description | truncatechars:20}}</p>
+                        <a href="/menu/event/commit/group/{{event_id}}/{{group.id}}" class="d-grid gap-2 col-6 mx-auto btn btn-primary">{{buttons}}</a>
+                      </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+    <h5>У Вас нет групп.</h5>
+    {% endif %}
+
+{% endif %}
+{% endblock %}

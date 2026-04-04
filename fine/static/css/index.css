@@ -1,0 +1,56 @@
+.index-gradient {
+    /*background: linear-gradient(bottom left, #3931af, #00c6ff);*/
+    /*background:  linear-gradient(45deg, #3931af 0%, #00c6ff 100%);*/
+    /*background: -webkit-linear-gradient(bottom left, #000033, #8b00ff);*/
+    background-image: radial-gradient(circle, #50c878 0%, #00d4ff 100%);
+}
+
+.event-gradient {
+    background-image: linear-gradient(45deg, #00d4ff 0%, #50c878 100%);
+    border-radius: calc(0.5rem - 2px);
+}
+
+.events-around {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 75vw;
+    gap: 1vw;
+}
+
+.event {
+    --my-width: 18vw;
+    width: var(--my-width);
+    border: 2px solid #00d4ff;
+    border-radius: 0.5rem;
+    background-color: #FFFFFF;
+    padding: 2px;
+}
+
+.event > img {
+    width: var(--my-width);
+    height: var(--my-width);
+    border: 2px solid #00d4ff;
+    border-radius: 0.5rem;
+    margin-left: -4px;
+    margin-top: -4px;
+    object-fit: cover;
+    background-color: #FFFFFF;
+}
+
+.event-button {
+    display: inline-block;
+    width: 18vw;
+    padding: 5px 10px;
+    border-radius: 0.5rem;
+    margin-left: -4px;
+    margin-bottom: -4px;
+    text-align: center;
+    color: #FFFFFF;
+    background-color: #00d4ff;
+    transition: 0.5s ease;
+}
+.event-button:hover {
+    color: #FFFFFF;
+    background-color: #50c878;
+}

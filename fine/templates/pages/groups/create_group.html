@@ -1,0 +1,17 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% load static %}
+
+{% block content %}
+
+    <div class="center-message">
+        <form method='post' class="myform-color" style="width: 50%;">
+            {% csrf_token %}
+            {#        {{ form.as_p }}#}
+            {% bootstrap_form form %}
+            <button type='submit' class="btn btn-primary btn-lg" value='submit'>Сохранить изменения</button>
+        </form>
+    </div>
+
+
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+{% endblock %}
+
+{% load static %}
+{% block extra_css %}
+
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+{% endblock %}
+
+{% block content %}
+
+    <div class="card text-center">
+        <div class="card-body">
+            <h5 class="card-title">{{ group.title }}</h5>
+            <p class="card-text">{{ group.description }}</p>
+        </div>
+        <div class="card-footer text-body-secondary">
+            Создатель: {{ group.founder }}
+        </div>
+    </div>
+    <hr>
+
+    <div class="d-grid gap-2 col-6 mx-auto">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ModalScrollable">
+            Показать список участников
+        </button>
+    </div>
+
+    <div class="modal fade" id="ModalScrollable" tabindex="-1" aria-labelledby="ModalScrollableTitle"
+         style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalScrollableTitle">Список участников группы</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-8 mx-auto">
+                                <div class="card" style="width: 18rem;">
+                                    {% if group.founder.avatar %}
+                                        <img class="card-img-top" src="{{ group.founder.avatar.url }}" alt="Card image cap">
+                                    {% endif %}
+                                    {% if not group.founder.avatar %}
+                                        <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
+                                             alt="Card image cap">
+                                    {% endif %}
+
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ group.founder.username }}</h5>
+                                        <p class="card-text">{{ group.founder.first_name }} {{ group.founder.last_name }}</p>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <a href="/profile/{{ group.founder.id }}" class="btn btn-primary"
+                                           type="button">Профиль</a>
+                                    </div>
+                                    <div class="card-footer text-body-secondary">
+                                        Создатель группы
+                                    </div>
+                                </div>
+                            </div>
+                    {% for member in users %}
+                        <div class="row">
+                            <div class="col-md-8 mx-auto">
+                                <div class="card" style="width: 18rem;">
+                                    {% if member.avatar %}
+                                        <img class="card-img-top" src="{{ member.avatar.url }}" alt="Card image cap">
+                                    {% endif %}
+                                    {% if not member.avatar %}
+                                        <img class="card-img-top" src="{% static 'images/default_avatar.png' %}"
+                                             alt="Card image cap">
+                                    {% endif %}
+
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ member.username }}</h5>
+                                        <p class="card-text">{{ member.first_name }} {{ member.last_name }}</p>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <a href="/profile/{{ member.id }}" class="btn btn-primary"
+                                           type="button">Профиль</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        {% if user == group.founder %}
+                            <a href="/groups/group/add_to_group/{{ group.id }}" class="btn btn-primary" type="button">Добавить
+                                пользователя</a>
+                            <a href="/groups/group/remove_from_the_group/{{ group.id }}" class="btn btn-primary"
+                               type="button">Удалить пользователя</a>
+                        {% endif %}
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="d-grid gap-2 d-md-block">
+        {% if user == group.founder %}
+            <a type="button" class="btn btn-lg btn-danger" data-bs-toggle="modal" data-bs-target="#Modal">
+                Удалить группу
+            </a>
+
+            <div class="modal fade" id="Modal" tabindex="-1" aria-labelledby="ModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="ModalLabel">Удаление группы</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>ВНИМАНИЕ!!!</strong></p>
+                            <p>После нажатия на кнопку, группа будет навсегда удалена.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть окно
+                            </button>
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" name="del" value="del">Удалить группу
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if user != group.founder %}
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" name="del" value="user">Покинуть группу</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base/base.html' %}
+
+{% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    <div class="profile-around">
+        {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" class="profile-icon">
+        {% else %}
+            <img src="{% static 'images/default_avatar.png' %}" class="profile-icon">
+        {% endif %}
+        {% if request.user == user %}
+            <a href="{% url 'edition_about' %}" class="profile-change-btn">
+                Edit Profile
+            </a>
+        {% endif %}
+        <div class="profile-info-box">
+            <h1 style="font-size: 50px;">{{ user.first_name }} {{ user.last_name }}</h1>
+            <a href="{% url 'profile' code=user.id %}"
+               class="card-link"
+               style="margin-top: -10px; font-size: 25px;">@{{ user.username }}</a>
+            <p style="color: #6c757d;">Зарегистрирован с {{ user.date_joined.date }}</p>
+            <h5>Email: <span class="profile-info-email">{{ user.email }}</span></h5>
+            <div style="display:block; height: 100%;"></div>
+            {% if request.user == user %}
+                <a href="{% url 'edition_about' %}" class="btn btn-primary profile-edit-btn">
+                    Редактировать профиль
+                </a>
+            {% endif %}
+            {% if request.user != user and request.user.is_authenticated %}
+                <form method="post" style="width: 100%;">
+                    {% csrf_token %}
+                    {% if already_friend is False and have_request is False %}
+                        <button type="submit" class="btn btn-primary profile-edit-btn" value="friend_button"
+                                name="button">Отправить запрос
+                        </button>
+                    {% endif %}
+                    {% if waiting_friend is True and have_request is False %}
+                        <button type="submit" class="btn btn-danger profile-edit-btn" value="del_request"
+                                name="button">Удалить запрос
+                        </button>
+                    {% endif %}
+                    {% if waiting_friend is False and have_request is False %}
+                        <button type="submit" class="btn btn-danger profile-edit-btn" value="del_friend"
+                                name="button">Удалить друга
+                        </button>
+                    {% endif %}
+                    {% if have_request is True %}
+                        <button type="submit" class="btn btn-primary profile-edit-btn" value="acp_friend"
+                                name="button">Принять запрос
+                        </button>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        <h4 style="margin-left: 2vw;">Участвовал в:</h4>
+        <div class="events-around" style="flex-wrap: nowrap; overflow: auto; padding-bottom: 5px;">
+            {% for event in events %}
+                <div class="event">
+                    <img src="{% static 'images/default.png' %}" alt="...">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><h3>{{ event.name }}</h3></li>
+                        <li class="list-group-item">
+                            <h6>
+                                {{ event.author.first_name }} {{ event.author.last_name }} <a
+                                    href="{% url 'profile' code=event.author.id %}"
+                                    class="card-link">@{{ event.author.username }}</a></h6></li>
+                    </ul>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description }}
+                        </li>
+                    </ul>
+                    <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <h4>Организовал:</h4>
+    {% for event in my_events %}
+        <div class="card" style="margin-top: 1.5vw; margin-bottom: 0;">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{% static 'images/default.png' %}" class="img-fluid rounded-start" alt="..."
+                         style="object-fit: cover; width: 100%; height: 100%">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.name }}</h5>
+                        <h6>
+                            {{ event.author.first_name }} {{ event.author.last_name }} <a
+                                href="{% url 'profile' code=event.author.id %}"
+                                class="card-link">@{{ event.author.username }}</a></h6>
+                        <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
+

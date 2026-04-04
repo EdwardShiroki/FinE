@@ -1,0 +1,84 @@
+{% extends 'base/base.html' %}
+{% load bootstrap5 %}
+{% load static %}
+
+
+{% block extra_css %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=24508b70-f08e-4774-b1ef-8f6cc1da061b&lang=ru_RU" type="text/javascript"></script>
+    <link rel="stylesheet" href="{% static 'css/event.css' %}"/>
+{% endblock %}
+
+{% include 'base/messages.html' %}
+
+{% block content %}
+    <h1 class="mt-4">Создание мероприятия:</h1>
+    <hr>
+    <div class="object">
+            <div class="col">
+              <form method="post" class="myform-color">
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <label for="id_name">Название мероприятия:</label>
+                        <td>
+                            <input class="form-control" placeholder="День рождения" type="text" name="name" maxlength="255" required id="id_name">
+                        </td>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="id_type">Статус мероприятия:</label>
+                        <td>
+                          <select name="type" class="form-control form-control-sm" required id="id_type">
+                              <option style="color: #000000;" value="" selected></option>
+                              <option style="color: #000000;" value="0">Закрытое</option>
+                              <option style="color: #000000;" value="1">Открытое</option>
+                          </select>
+                        </td>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="id_entertainment_type">Тип мероприятия:</label>
+                        <td>
+                          <select name="entertainment_type" style="color: #000000;" class="form-control form-control-sm" required id="id_entertainment_type">
+                              <option style="color: #000000;" value="" selected></option>
+                              <option style="color: #000000;" value="0">Спортивное мероприятие</option>
+                              <option style="color: #000000;" value="1">Встреча / Сходка</option>
+                              <option style="color: #000000;" value="2">Видеоигры</option>
+                              <option style="color: #000000;" value="3">Развлечния (Фильм / Театр и т.п.)</option>
+                          </select>
+                        </td>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="id_address">Адресс проведения мероприятия:</label>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Москва, Комсомольская площадь, 1с10" name="address" maxlength="255" aria-describedby="addresshelp" required id="id_address">
+                      <small id="addresshelp" class="form-text text-muted">Поставьте метку на карте ниже и скопируйте адресс.</small>
+                    </td>
+                  </div>
+                  <div id="map" class="map"></div>
+                  <div class="second-form-group">
+                    <label for="id_start_day">Дата начала мероприятия:</label>
+                    <input type="date" class="form-control" name="start_day" required id="id_start_day"  min="{{today}}">
+                  </div>
+
+                  <div class="second-form-group">
+                    <label for="id_finish_day">Дата окончания мероприятия:</label>
+                     <input type="date" class="form-control" name="finish_day" required id="id_finish_day"  min="{{today}}">
+                  </div>
+
+                  <div class="second-form-group">
+                    <label for="id_description">Описание мероприятия:</label>
+                        <td>
+                          <input type="text" class="form-control" placeholder="День рождения нашего друга - Альберта!" name="description" maxlength="255" required id="id_description">
+                        </td>
+                  </div>
+                  <button type="submit" class="btn btn-primary float-right btn-block second-form-group">Cоздать</button>
+              </form>
+            </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/event_reverse_geocode.js' %}"></script>
+{% endblock %}

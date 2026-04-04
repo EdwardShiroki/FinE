@@ -1,0 +1,4 @@
+.full-button {
+    display: inline-block;
+    margin-right: calc(1vw - 1px);
+}

@@ -1,0 +1,118 @@
+{% extends 'base/base.html' %}
+
+{% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=24508b70-f08e-4774-b1ef-8f6cc1da061b&lang=ru_RU" type="text/javascript"></script>
+    <link rel="stylesheet" href="{% static 'css/map_event.css' %}"/>
+{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+    <div class="container np" style="height: 100%;">
+        <div class="row" style="height: 100%;">
+            <div class="col-5" style="height: 100%;">
+                <div class="card" style="max-height: 100%;">
+                    <img src="{% static 'images/default.png' %}" class="card-img-top" alt="...">
+                    <div id="map" class="map "></div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><h3>{{ event.name }}</h3></li>
+                        <li class="list-group-item">
+                            <h6>
+                                {{ event.author.first_name }} {{ event.author.last_name }} <a
+                                    href="{% url 'profile' code=event.author.id %}"
+                                    class="card-link">@{{ event.author.username }}</a></h6></li>
+                    </ul>
+                    <ul class="list-group list-group-flush" style="overflow-y: auto;">
+                        <li class="list-group-item">{{ event.description }}</li>
+                        <li class="list-group-item">{{ event.start_day }} - {{ event.finish_day }}</li>
+                    </ul>
+                    <div class="card-footer">
+                        {% if going %}
+                            <button id="mybtn" onclick="myclick()" class="btn btn-outline-success w-100">Не пойду</button>
+                        {% else %}
+                            <button id="mybtn" onclick="myclick()" class="btn btn-success w-100">Пойду</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-7" style="height: 100%;">
+                <div class="container col d-flex flex-column np" style="height: 100%;">
+                    <div style="max-height: 50%;">
+                        <h4 style="height: 30px; margin-bottom: 10px;">Друзья:</h4>
+                        <div class="row np" style="max-height: calc(100% - 40px); overflow-y: auto;">
+                            <div class="col">
+                                {% for user in friends %}
+                                    <div class="card mb-2" style="width: 100%;">
+                                        <div>
+                                            <div style="display: inline-block;">
+                                                {% if user.avatar %}
+                                                    <img src="{{ user.avatar.url }}" class="img-fluid rounded-start"
+                                                         style="height: 30px; width: 30px; object-fit: cover">
+                                                {% else %}
+                                                    <img src="{% static 'images/default.png' %}"
+                                                         class="img-fluid rounded-start"
+                                                         style="height: 30px; width: 30px; object-fit: cover">
+                                                {% endif %}
+                                            </div>
+                                            <div style="display: inline-block;">
+                                                <div class="card-body np" style="padding-left: 10px; height: 100%;">
+                                                    <h5 class="card-title"
+                                                        style="height: 100%; margin: 0; text-align: start;">
+                                                        {{ user.first_name }} {{ user.last_name }} <a
+                                                            href="{% url 'profile' code=user.id %}">@{{ user.username }}</a>
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <h4 style="height: 30px; margin-bottom: 10px;">Все люди:</h4>
+                    <div class="row flex-grow-1 overflow-auto np">
+                        <div class="col">
+                            {% for user in people %}
+                                <div class="card mb-2" style="width: 100%;">
+                                    <div>
+                                        <div style="display: inline-block;">
+                                            {% if user.avatar %}
+                                                <img src="{{ user.avatar.url }}" class="img-fluid rounded-start"
+                                                     style="height: 30px; width: 30px; object-fit: cover">
+                                            {% else %}
+                                                <img src="{% static 'images/default.png' %}"
+                                                     class="img-fluid rounded-start"
+                                                     style="height: 30px; width: 30px; object-fit: cover">
+                                            {% endif %}
+                                        </div>
+                                        <div style="display: inline-block;">
+                                            <div class="card-body np" style="padding-left: 10px; height: 100%;">
+                                                <h5 class="card-title"
+                                                    style="height: 100%; margin: 0; text-align: start;">
+                                                    {{ user.first_name }} {{ user.last_name }} <a
+                                                        href="{% url 'profile' code=user.id %}"
+                                                        class="card-link">@{{ user.username }}</a>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if user == event.author %}
+        <a type="button" class="btn btn-primary" href='/groups?action=invite&event_id={{event.id}}'>Пригласить пользователей из группы</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/event.js' %}"></script>
+    {{ address | json_script:"alfa" }}
+    <script src="{% static 'js/ya_maps.js' %}"></script>
+{% endblock %}
