@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 from django.db import models
-
+from django.utils import timezone
 
 class EntertainmentType(models.IntegerChoices):
     """
@@ -125,3 +125,27 @@ class UserGroups(models.Model):
     description = models.CharField(max_length=255)
     founder = models.ForeignKey(get_user_model(), models.CASCADE, related_name='founder')
     members = models.ManyToManyField(get_user_model(), related_name='members')
+
+class UserRecommendation(models.Model):
+    """
+    База рекомендаций
+
+    :param user: Пользователь, которому рекомендовано мероприятие :class:`django.db.models.ForeignKey`
+    :param event: Рекомендованное мероприятие :class:`django.db.models.ForeignKey`
+    """
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='recommendation_user')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='recommendation_event')
+    score = models.FloatField(default=0.0)
+    rank = models.IntegerField()
+    generated_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'event'], name='unique_user_event_recommendation')
+        ]
+        
+        indexes = [
+            models.Index(fields=['user', 'rank'], name='user_rank_idx'),
+        ]
+        
+        ordering = ['rank'] 
