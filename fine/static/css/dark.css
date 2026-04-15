@@ -1,108 +1,96 @@
-.dark .gradient-background:before {
-    /*background: linear-gradient(bottom left, #000033, #8b00ff);*/
+.dark {
+    --bg-start: #101826;
+    --bg-mid: #12263a;
+    --bg-end: #112e2f;
+
+    --surface: rgba(17, 28, 43, 0.82);
+    --surface-solid: #1a2d43;
+    --surface-soft: #203850;
+    --border: rgba(170, 204, 228, 0.23);
+
+    --text-main: #eaf3ff;
+    --text-muted: #a9c0d7;
+
+    --primary: #62bae8;
+    --primary-strong: #45a5d7;
+    --secondary: #849cb4;
+    --secondary-strong: #6f859c;
+    --success: #3eb783;
+    --success-strong: #2f9d6e;
+    --danger: #e07b88;
+    --danger-strong: #c95f6d;
+    --warning: #e3ac67;
+    --warning-strong: #ca944f;
+
+    --accent: #64d3c2;
+    --panel-shadow: 0 20px 46px rgba(0, 0, 0, 0.34);
+    --card-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+    --btn-shadow: 0 10px 18px rgba(0, 0, 0, 0.26);
+
+    --scrollbarBg: linear-gradient(180deg, #26384d 0%, #274b49 100%);
+    --scrollbarThumb: rgba(152, 204, 228, 0.62);
+}
+
+.dark .gradient-background::after {
+    background-image:
+        radial-gradient(900px 720px at -10% -8%, rgba(54, 118, 176, 0.28) 0%, transparent 60%),
+        radial-gradient(800px 640px at 115% 4%, rgba(58, 136, 112, 0.24) 0%, transparent 62%),
+        linear-gradient(150deg, var(--bg-start) 0%, var(--bg-mid) 46%, var(--bg-end) 100%);
     opacity: 1;
 }
 
-.dark .index-gradient {
-    background-image: radial-gradient(circle, #FF6700 0%, #8b00ff 100%);
-    /*opacity: 1;*/
-}
-
 .dark .mycontainer {
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: var(--surface);
 }
 
-.dark * {
-    color: #FFFFFF;
+.dark .text-muted,
+.dark .list-group-item,
+.dark .card-title {
+    color: var(--text-main) !important;
 }
 
 .dark .black-color-text {
-    color: #000000;
+    color: #132638;
+}
+
+.dark .event .list-group-item,
+.dark .card,
+.dark .card > ul > li,
+.dark .modal-content,
+.dark .modal-header,
+.dark .modal-footer,
+.dark .table > :not(caption) > * > * {
+    background-color: var(--surface-solid);
+    border-color: var(--border);
+}
+
+.dark .table {
+    color: var(--text-main);
+}
+
+.dark .table-dark {
+    --bs-table-bg: var(--surface-solid);
+    --bs-table-striped-bg: #23384f;
+    --bs-table-striped-color: var(--text-main);
+    --bs-table-color: var(--text-main);
+    --bs-table-border-color: var(--border);
+}
+
+.dark .modal-body {
+    background-color: #192d43;
+}
+
+.dark .tabs > div:first-child {
+    background-color: var(--surface-soft);
 }
 
 .dark .tabs > div > label {
-    background-color: #273247;
-}
-
-.dark .tabs > div > input[type="radio"]:checked + label {
-    background-color: #8b00ff;
-    color: #FFFFFF;
-}
-
-.dark .mycard {
-    background-color: #273247;
-    border-color: #333333;
-}
-
-.dark .dark-mycard {
-    background-color: #000000;
-    border-color: #FF6700;
-    color: #FFFFFF;
-}
-
-.dark .event-gradient {
-    background-image: linear-gradient(45deg, #8b00ff 0%, #FF6700 100%);
-}
-
-.dark .event,
-.dark .event > img {
-    background-color: #000000;
-    border-color: #FF6700;
-}
-
-.dark .event .list-group,
-.dark .event .list-group-item {
-    background-color: #000000;
-}
-
-.dark .event-button {
-    background-color: #8b00ff;
-}
-
-.dark .event-button:hover {
-    background-color: #FF6700;
-}
-
-.dark .mycard > img {
-    border-color: #333333;
+    color: var(--text-muted);
 }
 
 .dark .myform-color > .profile-info-box > p > input,
 .dark .card-link {
-    color: #8b00ff;
-}
-
-.dark .btn-primary {
-    background-color: #8b00ff;
-    border-color: #8b00ff;
-}
-
-.dark .btn-primary:hover {
-    background-color: #7200C9;
-    border-color: #7200C9;
-}
-
-
-.dark .btn-primary.active,
-.dark .btn-outline-primary.active {
-    background-color: #59009C;
-    border-color: #59009C;
-}
-
-.dark .btn-outline-primary {
-    border-color: #8b00ff;
-    color: #8b00ff;
-}
-
-.dark .btn-outline-primary:hover {
-    background-color: #8b00ff;
-    color: #FFFFFF;
-}
-
-.dark .outline:hover {
-    color: #FFFFFF;
-    background-color: var(--backgroung-color);
-    border-color: var(--backgroung-color);
+    color: var(--primary);
 }
 
 .dark .myform-color > .profile-info-box > h1 > input,
@@ -111,38 +99,38 @@
 .dark .myform-color > div > select,
 .dark .myform-color > div > select > option,
 .dark .myform-color > div > textarea {
-    color: #000000;
+    color: #12283c;
 }
 
-.dark * {
-    --scrollbarBg: linear-gradient(180deg, #8b00ff 0%, #c8328a 50%, #8b00ff 100%);
-    --scrollbarThumb: rgba(255, 255, 255, 0.5);
+.dark .btn-outline-primary,
+.dark .btn-outline-secondary,
+.dark .btn-outline-success,
+.dark .btn-outline-danger,
+.dark .btn-outline-warning {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
-.dark .modal-body {
-    background-color: #000033;
+.dark select.form-control,
+.dark select.form-select {
+    background-color: var(--surface-soft) !important;
+    color: var(--text-main) !important;
 }
 
-
-.dark .card,
-.dark .card > ul > li,
-.dark .modal-content,
-.dark .modal-header,
-.dark .modal-footer {
-    background-color: #273247;
+.dark select.form-control option,
+.dark select.form-select option {
+    background: var(--surface-solid) !important;
+    color: var(--text-main) !important;
 }
 
+.dark select.form-control option:checked,
+.dark select.form-select option:checked,
+.dark select.form-control option:hover,
+.dark select.form-select option:hover {
+    background: var(--primary) !important;
+    color: #082839 !important;
+}
 
 .dark .myprimary {
-    --backgroung-color: #8b00ff;
-    background-color: var(--backgroung-color);
-    color: #FFFFFF;
-}
-
-.dark .outline {
-    padding: 8px 13px;
-    background: none;
-    color: var(--backgroung-color);
-    border: 2px solid;
-    font-weight: bold;
+    --backgroung-color: var(--primary);
+    color: #082839;
 }

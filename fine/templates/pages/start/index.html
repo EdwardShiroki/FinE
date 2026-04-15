@@ -3,15 +3,15 @@
 {% load static %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/cards.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/index.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/cards.css' %}?v=20260414a"/>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}?v=20260414a"/>
 {% endblock %}
 
 {% block content %}
-    <div class="center-message index-gradient" style="width: 100%; min-height: calc(77vh - 3vw);">
-        <div>
+    <div class="center-message index-gradient hero-splash">
+        <div class="hero-brand">
             <div class="center-message">
-                <h1 style="font-size: 96px; color: #FFFFFF;">FinE</h1>
+                <h1 class="brand-hero-title">FinE</h1>
             </div>
             {% if not request.user.is_authenticated %}
                 <a href="{% url 'register' %}" class="mybtn myprimary" style="margin-right: 5px;">Регистрация</a>
@@ -89,3 +89,5 @@
         </div>
     </div>
 {% endblock %}
+
+

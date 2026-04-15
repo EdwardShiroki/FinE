@@ -1,39 +1,44 @@
 .card-around {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2vw;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
 }
 
 .mycard {
-    --my-width: calc((79vw - 4vw - 2vw * 4) / 5);
-    width: var(--my-width);
-    border: 2px solid #ccc;
-    padding: 2px;
-    border-radius: 0.5rem;
-    background-color: #FFFFFF;
+    width: 100%;
+    border: 1px solid var(--border);
+    padding: 0;
+    border-radius: var(--radius-md);
+    background-color: var(--surface-solid);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.mycard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 34px rgba(24, 58, 88, 0.16);
 }
 
 .dark-mycard {
     display: flex;
     justify-content: center;
-    width: 40%;
-    padding: 2rem 3rem;
-    margin: 20px;
-    border: 2px solid #50c878;
-    border-radius: 1rem;
-    background-color: #FFFFFF;
-    color: #000000;
+    width: 100%;
+    padding: 2rem;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background-color: var(--surface-solid);
+    color: var(--text-main);
 }
 
 .mycard > img {
-    width: var(--my-width);
-    height: var(--my-width);
-    border: 2px solid #ccc;
-    border-radius: 0.5rem;
-    margin-left: -4px;
-    margin-top: -4px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: none;
+    border-radius: 0;
+    margin: 0;
     object-fit: cover;
-    background-color: #FFFFFF;
+    background-color: #e6eef4;
 }
 
 .for-tag {
@@ -43,40 +48,18 @@
 .myform {
     display: flex;
     flex-wrap: wrap;
-    gap: 5%;
+    gap: 10px;
 }
 
 .myform > button {
     display: inline-block;
-    width: 47.5%;
+    width: calc(50% - 5px);
 }
 
 .min_pad {
 }
 
-
-@media screen and (max-device-width: 1500px) {
-    .mycard {
-        width: calc((79vw - 4vw - 2vw * 4) / 5);
-    }
-
-    .black-mycard {
-        width: 40%;
-    }
-
-    .min_pad {
-        padding: 0;
-    }
-
-    .min_pad_btn {
-        padding-top: 10px;
-        padding-bottom: 10px;
-    }
-
-    .myform {
-        display: flex;
-    }
-
+@media (max-width: 992px) {
     .myform > button {
         display: block;
         width: 100%;

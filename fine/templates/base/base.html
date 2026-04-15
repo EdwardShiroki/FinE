@@ -6,20 +6,24 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ pagename }} - FinE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
     {% bootstrap_css %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/menu.css' %}"/>
-    <link rel="stylesheet" href="{% static 'css/dark.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v=20260414a"/>
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}?v=20260414a"/>
+    <link rel="stylesheet" href="{% static 'css/dark.css' %}?v=20260414a"/>
     {% block extra_css %}{% endblock %}
     <script src="{% static 'js/theme.js' %}"></script>
 </head>
 
 
 <body class="gradient-background">
-<div style="display: flex; position: relative; margin-left: 10vw;">
-    <header class="mycontainer header" style="padding: 10px; margin-left: 0; margin-right: 0;">
+<div class="top-shell">
+    <header class="mycontainer header">
         {% include 'base/menu.html' %}
         {% block header %}{% endblock %}
     </header>
@@ -56,7 +60,7 @@
 
 <div class="mycontainer borders">
     {#    {% csrf_token %}#}
-    <main role="main" class="container-fluid np" style="overflow-y: auto; padding-right: 1vw; ">
+    <main role="main" class="container-fluid np app-main">
         {% bootstrap_messages %}
         {% block content %}{% endblock %}
     </main>
@@ -66,7 +70,7 @@
 
 <footer class="mycontainer footer">
     {% block footer %}
-        <div class="container text-right" style="display: flex; height: 100%; align-items: center; margin: 0;">
+        <div class="container text-right footer-inner">
             <span class="text-muted">&copy; ШП, {% now "Y" %}</span>
         </div>
     {% endblock %}

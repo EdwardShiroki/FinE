@@ -1,12 +1,14 @@
 {% block menu %}
-    <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
-        {% for item in menu.left|is_authenticated:request.user.is_authenticated %}
-            <a class="btn {{ item|get_style }} {{ item.url_name|is_active:active }}" href="{{ item.url_name }}">{{ item.name }}</a>
-        {% endfor %}
-    </div>
-    <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
-        {% for item in menu.right|is_authenticated:request.user.is_authenticated %}
-            <a class="btn {{ item|get_style }} {{ item.url_name|is_active:active }}" href="{{ item.url_name }}">{{ item.name }}</a>
-        {% endfor %}
+    <div class="menu-layout">
+        <div class="btn-group btn-group-lg menu-group menu-left" role="group" aria-label="Main navigation">
+            {% for item in menu.left|is_authenticated:request.user.is_authenticated %}
+                <a class="btn full-button {{ item|get_style }} {{ item.url_name|is_active:active }}" href="{{ item.url_name }}">{{ item.name }}</a>
+            {% endfor %}
+        </div>
+        <div class="btn-group btn-group-lg menu-group menu-right" role="group" aria-label="Profile navigation">
+            {% for item in menu.right|is_authenticated:request.user.is_authenticated %}
+                <a class="btn full-button {{ item|get_style }} {{ item.url_name|is_active:active }}" href="{{ item.url_name }}">{{ item.name }}</a>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
