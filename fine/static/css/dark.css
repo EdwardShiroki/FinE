@@ -99,7 +99,70 @@
 .dark .myform-color > div > select,
 .dark .myform-color > div > select > option,
 .dark .myform-color > div > textarea {
-    color: #12283c;
+    color: var(--text-main);
+}
+
+.dark .form-control,
+.dark .form-select,
+.dark textarea,
+.dark input[type="text"],
+.dark input[type="password"],
+.dark input[type="email"],
+.dark input[type="number"],
+.dark input[type="search"],
+.dark input[type="url"],
+.dark input[type="tel"],
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="time"] {
+    background-color: var(--surface-soft) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border);
+    -webkit-text-fill-color: var(--text-main);
+    color-scheme: dark;
+}
+
+.dark .form-control::placeholder,
+.dark .form-select::placeholder,
+.dark textarea::placeholder,
+.dark input::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 1;
+}
+
+.dark .form-control:focus,
+.dark .form-select:focus,
+.dark textarea:focus,
+.dark input:focus {
+    background-color: var(--surface-solid) !important;
+    color: var(--text-main) !important;
+    border-color: rgba(98, 186, 232, 0.65);
+    box-shadow: 0 0 0 0.2rem rgba(98, 186, 232, 0.2);
+    -webkit-text-fill-color: var(--text-main);
+}
+
+.dark input[type="date"]::-webkit-datetime-edit,
+.dark input[type="datetime-local"]::-webkit-datetime-edit,
+.dark input[type="time"]::-webkit-datetime-edit {
+    color: var(--text-main);
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(93%) sepia(7%) saturate(350%) hue-rotate(174deg) brightness(104%) contrast(102%);
+    opacity: 0.9;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark select:-webkit-autofill {
+    -webkit-text-fill-color: var(--text-main) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--surface-soft) inset !important;
+    box-shadow: 0 0 0 1000px var(--surface-soft) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .dark .btn-outline-primary,
