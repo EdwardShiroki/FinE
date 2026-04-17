@@ -13,6 +13,7 @@ from django.contrib import messages
 from fine.models import User, Event, Friends, UserGroups, Report, UserRecommendation
 from fine.forms import EditProfile, RegistrationForm, CreateEvent, SearchFriends, CreateGroup, \
     VerifyReportForm, CreateReportForm
+from fine.services.recommendations import generate_for_user
 
 
 def defense(func):
@@ -185,9 +186,12 @@ def feed_page(request: WSGIRequest):
     """
     context = get_context(request, "Рекомендации", reverse("feed"))
 
-    recommendations = UserRecommendation.objects.filter(
-        user=request.user
-    ).select_related("event", "event__author").order_by("rank")
+    recommendations_qs = UserRecommendation.objects.filter(user=request.user)
+    if not recommendations_qs.exists():
+        generate_for_user(request.user)
+        recommendations_qs = UserRecommendation.objects.filter(user=request.user)
+
+    recommendations = recommendations_qs.select_related("event", "event__author").order_by("rank")
 
     if request.method == 'POST' and request.POST.get('entertainment_type') != '-1':
         recommendations = recommendations.filter(
