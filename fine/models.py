@@ -66,6 +66,8 @@ class Event(models.Model):
     description = models.TextField()
     author = models.ForeignKey(get_user_model(), models.CASCADE, related_name='author')
     entertainment_type = models.IntegerField(choices=EntertainmentType.choices, default=1)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
     members = models.ManyToManyField(get_user_model(), related_name='event_members')
 
 class Report(models.Model):

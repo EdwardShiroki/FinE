@@ -4,7 +4,7 @@
 
 
 {% block extra_css %}
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=24508b70-f08e-4774-b1ef-8f6cc1da061b&lang=ru_RU" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_maps_api_key }}&lang=ru_RU" type="text/javascript"></script>
     <link rel="stylesheet" href="{% static 'css/event.css' %}?v=20260414a"/>
 {% endblock %}
 
@@ -55,6 +55,8 @@
                       <small id="addresshelp" class="form-text text-muted">Поставьте метку на карте ниже и скопируйте адресс.</small>
                     </td>
                   </div>
+                  <input type="hidden" name="latitude" id="id_latitude">
+                  <input type="hidden" name="longitude" id="id_longitude">
                   <div id="map" class="map"></div>
                   <div class="second-form-group">
                     <label for="id_start_day">Дата начала мероприятия:</label>

@@ -24,8 +24,8 @@ from fine.views import get_context
 
 handler404 = "fine.views.profile_view_page"
 
-context_for_login = get_context(page_name="Авторизация", active="/login/")
-context_for_login["menu"]["right"]["unauthorized"][1] = {'url_name': '/login/', 'name': 'Войти'}
+context_for_login = get_context(page_name="\u0410\u0432\u0442\u043e\u0440\u0438\u0437\u0430\u0446\u0438\u044f", active="/login/")
+context_for_login["menu"]["right"]["unauthorized"][1] = {'url_name': '/login/', 'name': '\u0412\u043e\u0439\u0442\u0438'}
 
 urlpatterns = [
     path('', views.index_page, name='index'),
@@ -67,3 +67,4 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

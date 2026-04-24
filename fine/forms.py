@@ -39,7 +39,21 @@ class CreateEvent(ModelForm):
         :param entertainment_type: Тип развлечений мероприятия
         """
         model = Event
-        fields = ['name', 'type', 'address', 'start_day', 'finish_day', 'description', 'entertainment_type']
+        fields = [
+            'name',
+            'type',
+            'address',
+            'start_day',
+            'finish_day',
+            'description',
+            'entertainment_type',
+            'latitude',
+            'longitude',
+        ]
+        widgets = {
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+        }
 
 
 class EditProfile(forms.ModelForm):

@@ -190,3 +190,15 @@
        docker exec -it CONTAINER_ID
     ```
 
+### ASGI
+
+* Local ASGI start:
+   ```bash
+   uvicorn fine_project.asgi:application --host 127.0.0.1 --port 8000
+   ```
+
+* Production ASGI start:
+   ```bash
+   gunicorn fine_project.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --timeout 120 --workers 3
+   ```
+

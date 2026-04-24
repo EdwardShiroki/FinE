@@ -4,7 +4,7 @@
 {% load static %}
 
 {% block extra_css %}
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=24508b70-f08e-4774-b1ef-8f6cc1da061b&lang=ru_RU" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_maps_api_key }}&lang=ru_RU" type="text/javascript"></script>
     <link rel="stylesheet" href="{% static 'css/map_event.css' %}?v=20260414a"/>
 {% endblock %}
 
@@ -114,5 +114,7 @@
 {% block extra_js %}
     <script src="{% static 'js/event.js' %}"></script>
     {{ address | json_script:"alfa" }}
+    {{ event.latitude|default_if_none:""|json_script:"event-latitude" }}
+    {{ event.longitude|default_if_none:""|json_script:"event-longitude" }}
     <script src="{% static 'js/ya_maps.js' %}"></script>
 {% endblock %}

@@ -197,3 +197,41 @@
     --backgroung-color: var(--primary);
     color: #082839;
 }
+
+.dark .nearby-events-panel {
+    background:
+        linear-gradient(160deg, rgba(20, 34, 52, 0.94) 0%, rgba(24, 43, 64, 0.96) 58%, rgba(20, 53, 54, 0.94) 100%);
+    border-color: rgba(170, 204, 228, 0.18);
+    box-shadow: var(--card-shadow);
+}
+
+.dark .nearby-events-map {
+    background:
+        radial-gradient(circle at 18% 22%, rgba(98, 186, 232, 0.12), transparent 32%),
+        radial-gradient(circle at 82% 28%, rgba(100, 211, 194, 0.12), transparent 30%),
+        linear-gradient(180deg, #16283c 0%, #18343f 100%);
+    border-color: rgba(170, 204, 228, 0.16);
+}
+
+.dark .nearby-events-panel h3,
+.dark .nearby-events-sidebar h4,
+.dark .nearby-events-status,
+.dark .nearby-events-item,
+.dark .nearby-events-item strong {
+    color: var(--text-main);
+}
+
+.dark .nearby-events-item {
+    background:
+        linear-gradient(180deg, rgba(24, 41, 61, 0.98) 0%, rgba(28, 49, 70, 0.98) 100%);
+    border-color: rgba(170, 204, 228, 0.16);
+}
+
+.dark .nearby-events-item:hover {
+    border-color: rgba(98, 186, 232, 0.34);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+}
+
+.dark .nearby-events-item span {
+    color: var(--text-muted);
+}

@@ -1,15 +1,30 @@
 {% extends 'base/base.html' %}
 {% load bootstrap5 %}
+{% load static %}
+
+{% block extra_css %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_maps_api_key }}&lang=ru_RU" type="text/javascript"></script>
+    <link rel="stylesheet" href="{% static 'css/event.css' %}?v=20260414a"/>
+{% endblock %}
+
 {% block content %}
     <h1 class="mt-4">Изменение ивента</h1>
     <hr>
     <div class="row mt-3">
-            <div class="col">
-              <form method="post" class="myform-color" action="{% url 'event_edit' event_id %}">
-                  {% csrf_token %}
-                  {% bootstrap_form form %}
-                  <button type="submit" class="btn btn-primary float-right btn-block">Обновить</button>
-              </form>
-            </div>
+        <div class="col">
+            <form method="post" class="myform-color" action="{% url 'event_edit' event_id %}">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                <div id="map" class="map"></div>
+                <button type="submit" class="btn btn-primary float-right btn-block">Обновить</button>
+            </form>
+        </div>
     </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ event.address|default_if_none:""|json_script:"initial-event-address" }}
+    {{ event.latitude|default_if_none:""|json_script:"initial-event-latitude" }}
+    {{ event.longitude|default_if_none:""|json_script:"initial-event-longitude" }}
+    <script src="{% static 'js/event_reverse_geocode.js' %}?v=20260424b"></script>
 {% endblock %}

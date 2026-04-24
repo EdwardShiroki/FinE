@@ -4,45 +4,66 @@
 {% load static %}
 
 {% block extra_css %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_maps_api_key }}&lang=ru_RU" type="text/javascript"></script>
     <link rel="stylesheet" href="{% static 'css/cards.css' %}?v=20260414a"/>
     <link rel="stylesheet" href="{% static 'css/index.css' %}?v=20260414a"/>
+    <link rel="stylesheet" href="{% static 'css/nearby_events_map.css' %}?v=20260424b"/>
 {% endblock %}
 
 {% block content %}
     <form method="post">
         {% csrf_token %}
-        <p><select style="color: #000000;" name="entertainment_type" class="form-control form-control-sm">
-            <option style="color: #000000;" value="-1">Все мероприятия</option>
-            <option style="color: #000000;" value="0">Спортивное мероприятие</option>
-            <option style="color: #000000;" value="1">Встреча / Сходка</option>
-            <option style="color: #000000;" value="2">Видеоигры</option>
-            <option style="color: #000000;" value="3">Развлечния (Фильм / Театр и т.п.)</option>
-        </select></p>
+        <p>
+            <select style="color: #000000;" name="entertainment_type" class="form-control form-control-sm">
+                <option style="color: #000000;" value="-1">Все мероприятия</option>
+                <option style="color: #000000;" value="0">Спортивное мероприятие</option>
+                <option style="color: #000000;" value="1">Встреча / сходка</option>
+                <option style="color: #000000;" value="2">Видеоигры</option>
+                <option style="color: #000000;" value="3">Развлечения (фильм, театр и т.п.)</option>
+            </select>
+        </p>
         <input class="btn btn-warning" type="submit" value="Фильтровать">
     </form>
-    <h3 class="text-center">Есть идеи для своего мероприятия?</h3>
+
+    <h3 class="text-center">Есть идея для своего мероприятия?</h3>
     <div class="d-grid gap-2 col-6 mx-auto">
         <a href="event/create/" class="btn btn-success" type="button">Реализуйте!</a>
     </div>
     <hr>
 
     {% if events %}
-        <h3>Мероприятия в вашем городе: </h3>
+        <section class="nearby-events-layout">
+            <div class="nearby-events-panel">
+                <h3>Ближайшие мероприятия на карте</h3>
+                <p id="nearby-events-status" class="nearby-events-status">Готовлю карту мероприятий...</p>
+                <div id="nearby-events-map" class="nearby-events-map"></div>
+            </div>
+            <aside class="nearby-events-panel nearby-events-sidebar">
+                <h4>Ближайшие к вам</h4>
+                <div id="nearby-events-list" class="nearby-events-list"></div>
+            </aside>
+        </section>
+
+        <h3>Мероприятия в вашем городе:</h3>
         <div class="events-around">
             {% for event in events %}
                 <div class="event">
-                    <img src="{% static 'images/default.png' %}" alt="...">
+                    <img src="{% static 'images/default.png' %}" alt="event">
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item"><h3>{{ event.name }}</h3></li>
                         <li class="list-group-item">
                             <h6>
-                                {{ event.author.first_name }} {{ event.author.last_name }} <a
-                                    href="{% url 'profile' code=event.author.id %}"
-                                    class="card-link">@{{ event.author.username }}</a></h6></li>
+                                {{ event.author.first_name }} {{ event.author.last_name }}
+                                <a href="{% url 'profile' code=event.author.id %}" class="card-link">
+                                    @{{ event.author.username }}
+                                </a>
+                            </h6>
+                        </li>
                     </ul>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item"
-                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description | truncatechars:20 }}
+                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            {{ event.description|truncatechars:20 }}
                         </li>
                     </ul>
                     <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
@@ -50,56 +71,70 @@
             {% endfor %}
         </div>
     {% else %}
-        <h3>Мероприятий не планируется.</h3>
+        <h3>Мероприятий пока не планируется.</h3>
     {% endif %}
+
     <hr>
-{% if user.is_authenticated %}
-    {% if private_events %}
-        <h3>Ваши приватные мероприятия: </h3>
-        <div class="events-around">
-            {% for event in my_private_events %}
-                <div class="event">
-                    <img src="{% static 'images/default.png' %}" alt="...">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><h3>{{ event.name }}</h3></li>
-                        <li class="list-group-item">
-                            <h6>
-                                {{ event.author.first_name }} {{ event.author.last_name }} <a
-                                    href="{% url 'profile' code=event.author.id %}"
-                                    class="card-link">@{{ event.author.username }}</a></h6></li>
-                    </ul>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"
-                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description | truncatechars:20 }}
-                        </li>
-                    </ul>
-                    <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
-                </div>
-            {% endfor %}
-            {% for event in private_events %}
-                <div class="event">
-                    <img src="{% static 'images/default.png' %}" alt="...">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"><h3>{{ event.name }}</h3></li>
-                        <li class="list-group-item">
-                            <h6>
-                                {{ event.author.first_name }} {{ event.author.last_name }} <a
-                                    href="{% url 'profile' code=event.author.id %}"
-                                    class="card-link">@{{ event.author.username }}</a></h6></li>
-                    </ul>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item"
-                            style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ event.description | truncatechars:20 }}
-                        </li>
-                    </ul>
-                    <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <h3>У Вас не планируются приватные мероприятия.</h3>
+
+    {% if user.is_authenticated %}
+        {% if private_events %}
+            <h3>Ваши приватные мероприятия:</h3>
+            <div class="events-around">
+                {% for event in my_private_events %}
+                    <div class="event">
+                        <img src="{% static 'images/default.png' %}" alt="event">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><h3>{{ event.name }}</h3></li>
+                            <li class="list-group-item">
+                                <h6>
+                                    {{ event.author.first_name }} {{ event.author.last_name }}
+                                    <a href="{% url 'profile' code=event.author.id %}" class="card-link">
+                                        @{{ event.author.username }}
+                                    </a>
+                                </h6>
+                            </li>
+                        </ul>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"
+                                style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ event.description|truncatechars:20 }}
+                            </li>
+                        </ul>
+                        <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
+                    </div>
+                {% endfor %}
+
+                {% for event in private_events %}
+                    <div class="event">
+                        <img src="{% static 'images/default.png' %}" alt="event">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><h3>{{ event.name }}</h3></li>
+                            <li class="list-group-item">
+                                <h6>
+                                    {{ event.author.first_name }} {{ event.author.last_name }}
+                                    <a href="{% url 'profile' code=event.author.id %}" class="card-link">
+                                        @{{ event.author.username }}
+                                    </a>
+                                </h6>
+                            </li>
+                        </ul>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"
+                                style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ event.description|truncatechars:20 }}
+                            </li>
+                        </ul>
+                        <a class="event-button" href="{% url 'event' event_id=event.id %}">Подробнее</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h3>У вас пока нет приватных мероприятий.</h3>
+        {% endif %}
     {% endif %}
-{% endif %}
 {% endblock %}
 
-
+{% block extra_js %}
+    {{ events_map_data|json_script:"events-map-data" }}
+    <script src="{% static 'js/nearby_events_map.js' %}?v=20260424a"></script>
+{% endblock %}

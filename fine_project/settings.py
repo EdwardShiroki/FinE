@@ -31,6 +31,11 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
+YANDEX_MAPS_API_KEY = os.environ.get(
+    "YANDEX_MAPS_API_KEY",
+    "dc4352c9-0493-41e0-83f1-e73b3ef4740b",
+)
+
 CSRF_TRUSTED_ORIGINS = [
     "https://fine.stylelifeweb.su",
     "http://127.0.0.1",
@@ -85,6 +90,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'fine_project.wsgi.application'
+ASGI_APPLICATION = 'fine_project.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
