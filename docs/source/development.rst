@@ -44,7 +44,9 @@ Configuration details
 
 - ``DEBUG`` is derived from the environment variable ``debug``
 - when ``debug=False``, database settings switch to PostgreSQL
-- the Docker entrypoint in ``start.sh`` runs migrations, collects static files, and starts ``gunicorn``
+- Kubernetes bootstrap job runs ``python manage.py migrate --noinput`` before backend rollout
+- the backend image starts ASGI directly via ``gunicorn`` + ``uvicorn.workers.UvicornWorker``
+- Redis cache and PostgreSQL endpoints are injected through environment variables
 
 Known technical constraints
 ---------------------------

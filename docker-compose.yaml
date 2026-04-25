@@ -1,33 +1,106 @@
 services:
-  db:
-    image: postgres:16-alpine
-    hostname: db
+  registry:
+    image: registry:2
+    hostname: registry
     volumes:
-      - 'fine_db:/var/lib/postgresql/data'
-    environment:
-      POSTGRES_USER: chudo
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydb
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U chudo -d mydb"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      - registry_data:/var/lib/registry
 
-  back:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    hostname: back
-    environment:
-      debug: "False"
-    volumes:
-      - '/var/media:/proj/media'
-      - '/var/static:/var/static'
-    ports:
-      - "8001:8000"
+  image-publisher:
+    image: gcr.io/kaniko-project/executor:v1.23.2-debug
+    hostname: image-publisher
+    entrypoint: ["/busybox/sh"]
     depends_on:
-      db:
+      - registry
+    volumes:
+      - ./:/workspace:ro
+    command:
+      - -ec
+      - >
+        until wget -q -O /dev/null http://registry:5000/v2/; do sleep 2; done;
+        /kaniko/executor
+        --context=dir:///workspace
+        --dockerfile=/workspace/Dockerfile
+        --destination=registry:5000/fine-backend:latest
+        --insecure
+        --skip-tls-verify
+        --cache=true
+        --cache-repo=registry:5000/fine-backend/cache
+    restart: "no"
+
+  k3s:
+    image: rancher/k3s:v1.29.4-k3s1
+    hostname: k3s
+    privileged: true
+    command:
+      - server
+      - --disable
+      - traefik
+      - --disable
+      - servicelb
+      - --tls-san
+      - k3s
+    environment:
+      K3S_KUBECONFIG_OUTPUT: /output/kubeconfig.yaml
+      K3S_KUBECONFIG_MODE: "644"
+    ports:
+      - "6443:6443"
+      - "8001:30081"
+    tmpfs:
+      - /run
+      - /var/run
+    volumes:
+      - k3s_data:/var/lib/rancher/k3s
+      - kubeconfig_data:/output
+      - ./k3s/registries.yaml:/etc/rancher/k3s/registries.yaml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "kubectl get nodes >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  k8s-bootstrap:
+    image: rancher/k3s:v1.29.4-k3s1
+    hostname: k8s-bootstrap
+    entrypoint: ["/bin/sh"]
+    depends_on:
+      image-publisher:
+        condition: service_completed_successfully
+      k3s:
         condition: service_healthy
+    volumes:
+      - ./k8s:/manifests:ro
+      - kubeconfig_data:/output
+    command:
+      - -ec
+      - |
+        export KUBECONFIG=/output/kubeconfig.yaml
+        until [ -f "$${KUBECONFIG}" ]; do
+          sleep 1
+        done
+        sed -i 's/127.0.0.1/k3s/g' "$${KUBECONFIG}"
+        until kubectl get nodes >/dev/null 2>&1; do
+          sleep 2
+        done
+
+        kubectl apply -f /manifests/00-namespace.yaml
+        kubectl apply -f /manifests/01-config.yaml
+        kubectl apply -f /manifests/02-postgres.yaml
+        kubectl apply -f /manifests/03-redis.yaml
+
+        kubectl rollout status deployment/postgres -n fine --timeout=300s
+        kubectl rollout status deployment/redis -n fine --timeout=300s
+
+        kubectl delete job -n fine fine-backend-bootstrap --ignore-not-found=true
+        kubectl apply -f /manifests/04-backend-bootstrap-job.yaml
+        kubectl wait -n fine --for=condition=complete job/fine-backend-bootstrap --timeout=300s
+
+        kubectl apply -f /manifests/05-backend.yaml
+        kubectl apply -f /manifests/06-backend-hpa.yaml
+        kubectl rollout status deployment/fine-backend -n fine --timeout=300s
+        kubectl get pods,svc,hpa -n fine
+    restart: "no"
+
 volumes:
-  fine_db:
+  k3s_data:
+  kubeconfig_data:
+  registry_data:

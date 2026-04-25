@@ -18,7 +18,7 @@ This folder contains `wrk` profiles for:
 
 ## Prerequisites
 
-1. Start the project in Docker:
+1. Start the local k3s stack in Docker Compose:
 
 ```bash
 docker compose up -d --build
@@ -27,7 +27,7 @@ docker compose up -d --build
 2. Generate demo data so the login and event page exist:
 
 ```bash
-docker compose exec -T back python manage.py seed_demo_data --count 1000
+./tools/seed_demo_data_k8s.sh 1000
 ```
 
 3. Ensure `wrk`, `curl`, `python3`, and `docker` are available on the host machine.
@@ -62,7 +62,7 @@ Results are stored in different folders:
 Each run stores:
 
 - `wrk.txt` - raw `wrk` output
-- `cpu_samples.csv` - sampled CPU usage for the `back` container
+- `cpu_samples.csv` - sampled CPU usage for the `k3s` node container
 - `summary.txt` - extracted `latency`, `rps`, and `cpu%`
 - `endpoints.txt` - exact endpoint list used for the run
 - `cookies.txt`, `login_page.html`, `menu_page.html` - run artifacts for troubleshooting
@@ -93,5 +93,6 @@ Generated files:
 ## Notes
 
 - The scripts use the seeded account from the demo dataset by default: `demo_user_0001 / demo-pass-123`.
+- CPU samples are taken from the single-node `k3s` container, so they include backend pods plus lightweight cluster overhead.
 - The concrete event page is selected automatically from the first `/menu/event/<id>` link found on `/menu/`.
 - The stress profile reaches max RPS by using a more aggressive `threads/connections` combination without rate limiting.

@@ -17,6 +17,7 @@ from django.template.defaultfilters import register
 from django.urls import reverse
 from django.utils._os import safe_join
 
+from fine.cache_utils import invalidate_route_caches
 from fine.forms import (
     CreateEvent,
     CreateGroup,
@@ -28,6 +29,37 @@ from fine.forms import (
 )
 from fine.models import Event, Report, User, UserGroups
 from fine.services import queries
+
+EVENT_CACHE_ROUTES = (
+    "index",
+    "menu",
+    "feed",
+    "profile",
+    "event",
+    "event_create",
+    "event_edit",
+)
+FRIEND_CACHE_ROUTES = (
+    "profile",
+    "friends",
+    "search_friends",
+    "event",
+    "add_to_group",
+)
+GROUP_CACHE_ROUTES = (
+    "groups",
+    "group",
+    "create_group",
+    "add_to_group",
+    "remove_from_the_group",
+)
+REPORT_CACHE_ROUTES = (
+    "my_reports",
+    "create_report",
+    "report",
+    "verify_report",
+    "unverifed_reports",
+)
 
 
 @register.filter
@@ -187,6 +219,10 @@ async def _require_login(request: HttpRequest):
     return await _async_redirect(f"{settings.LOGIN_URL}?next={next_url}")
 
 
+async def _invalidate_cache(*route_names: str, extra_namespaces: tuple[str, ...] = ()):
+    await invalidate_route_caches(*route_names, extra_namespaces=extra_namespaces)
+
+
 async def _serve_file(document_root: str, path: str):
     try:
         resolved_path = safe_join(document_root, path)
@@ -240,6 +276,7 @@ async def theme_change(request: HttpRequest):
         return auth_redirect
 
     await queries.update_user_theme(request.user)
+    await _invalidate_cache(extra_namespaces=("theme",))
     return JsonResponse({"details": "ok"})
 
 
@@ -332,6 +369,7 @@ async def event_create_page(request: HttpRequest):
         if await _async_form_is_valid(form):
             if form.cleaned_data["start_day"] <= form.cleaned_data["finish_day"]:
                 event = await queries.create_event_from_form(request.user, form)
+                await _invalidate_cache(*EVENT_CACHE_ROUTES)
                 return await _async_redirect(reverse("event_commit", kwargs={"event_id": event.id}))
             await _add_error_message(
                 request,
@@ -360,6 +398,7 @@ async def event_edit_page(request: HttpRequest, event_id: int):
 
     if request.method == "POST" and await _async_form_is_valid(form):
         context["event"] = await queries.update_event_from_form(event_id, form)
+        await _invalidate_cache(*EVENT_CACHE_ROUTES)
 
     context["form"] = form
     return await _async_render(request, "pages/event/edit.html", context)
@@ -375,6 +414,7 @@ async def commit_event_page(request: HttpRequest, event_id: int):
     except Event.DoesNotExist:
         return await _async_redirect(reverse("event", kwargs={"event_id": event_id}))
 
+    await _invalidate_cache("event", "menu", "feed", "profile")
     return await _async_redirect(reverse("event", kwargs={"event_id": event_id}))
 
 
@@ -391,6 +431,7 @@ async def commit_event_group_page(request: HttpRequest, event_id: int, group_id:
     if event is None:
         return await _async_redirect("/")
 
+    await _invalidate_cache("event", "menu", "feed", "profile", *GROUP_CACHE_ROUTES)
     return await _async_redirect(reverse("event", kwargs={"event_id": event_id}))
 
 
@@ -414,6 +455,7 @@ async def profile_view_page(request: HttpRequest, code: int):
 
     if request.method == "POST":
         await queries.apply_profile_friend_action(request.user, code, request.POST.get("button"))
+        await _invalidate_cache(*FRIEND_CACHE_ROUTES, "profile")
         return await _async_redirect(f"/profile/{code}")
 
     return await _async_render(request, "pages/profile/view.html", context)
@@ -431,6 +473,7 @@ async def edit_page(request: HttpRequest):
     if request.method == "POST":
         if await _async_form_is_valid(form):
             await _async_form_save(form)
+            await _invalidate_cache("profile", "edition_about")
         return await _async_redirect(f"/profile/{request.user.id}")
 
     context["form"] = form
@@ -456,6 +499,7 @@ async def event_page(request: HttpRequest, event_id: int):
         data = json.loads(request.body)
         if data["going"]:
             await queries.leave_event(request.user, event_id)
+            await _invalidate_cache("event", "menu", "feed", "profile")
         else:
             return await _async_redirect(reverse("event_commit", kwargs={"event_id": event_id}))
 
@@ -484,6 +528,7 @@ async def friends_page(request: HttpRequest):
 
     if request.method == "POST":
         await queries.apply_friends_action(request.user, request.POST)
+        await _invalidate_cache(*FRIEND_CACHE_ROUTES)
         return await _async_redirect("/friends/")
 
     return await _async_render(request, "pages/friends/friends.html", context)
@@ -499,6 +544,7 @@ async def create_group_page(request: HttpRequest):
 
     if request.method == "POST" and await _async_form_is_valid(form):
         group = await queries.create_group_from_form(request.user, form)
+        await _invalidate_cache(*GROUP_CACHE_ROUTES)
         return await _async_redirect(f"/groups/group/{group.id}")
 
     context["form"] = form
@@ -547,9 +593,11 @@ async def group_page(request: HttpRequest, group_id: int):
 
     if request.POST.get("del") == "del":
         await queries.delete_group(group)
+        await _invalidate_cache(*GROUP_CACHE_ROUTES)
         return await _async_redirect("/groups/")
     if request.POST.get("del") == "user":
         await queries.remove_user_from_group(request.user, group)
+        await _invalidate_cache(*GROUP_CACHE_ROUTES)
         return await _async_redirect("/groups/")
 
     return await _async_render(request, "pages/groups/group.html", context)
@@ -571,6 +619,7 @@ async def search_friends(request: HttpRequest):
     friend_button = request.POST.get("friend_button")
     if friend_button:
         await queries.create_friend_request(request.user, friend_button)
+        await _invalidate_cache(*FRIEND_CACHE_ROUTES)
         return await _async_redirect("/search_friends/")
 
     return await _async_render(request, "pages/friends/search_friends.html", context)
@@ -605,6 +654,7 @@ async def add_to_group_page(request: HttpRequest, group_id: int):
     invite = request.POST.get("invite")
     if invite:
         await queries.invite_user_to_group(request.user, group, invite)
+        await _invalidate_cache(*GROUP_CACHE_ROUTES)
         return await _async_redirect(f"/groups/group/add_to_group/{group_id}")
 
     return await _async_render(request, "pages/groups/add_to_group.html", context)
@@ -639,6 +689,7 @@ async def remove_from_the_group_page(request: HttpRequest, group_id: int):
     delete_id = request.POST.get("delete")
     if delete_id:
         await queries.remove_member_from_group(delete_id, group_id)
+        await _invalidate_cache(*GROUP_CACHE_ROUTES)
         return await _async_redirect(f"/groups/group/remove_from_the_group/{group_id}")
 
     return await _async_render(request, "pages/groups/remove_from_the_group.html", context)
@@ -674,6 +725,7 @@ async def create_report_page(request: HttpRequest):
 
     if request.method == "POST" and await _async_form_is_valid(form):
         report = await queries.create_report(request.user, form)
+        await _invalidate_cache(*REPORT_CACHE_ROUTES)
         return await _async_redirect(reverse("report", kwargs={"report_id": report.id}))
 
     context["form"] = form
@@ -732,6 +784,7 @@ async def verify_report_page(request: HttpRequest, report_id: int):
 
     if request.method == "POST" and await _async_form_is_valid(form):
         await queries.verify_report(report_id, form.cleaned_data["answer_text"])
+        await _invalidate_cache(*REPORT_CACHE_ROUTES)
         return await _async_redirect("/reports/unverifed_reports")
 
     return await _async_render(request, "pages/reports/verify_report.html", context)

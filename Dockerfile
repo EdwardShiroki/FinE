@@ -1,7 +1,7 @@
 FROM python:3.10
 LABEL authors="urtanto"
 
-RUN mkdir proj
+RUN mkdir -p /proj /var/static /proj/media
 WORKDIR /proj
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -11,6 +11,6 @@ ENV debug=False
 COPY requirements.txt /proj/
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /proj/
-RUN chmod +x /proj/start.sh
+RUN python3 manage.py collectstatic --noinput
 
-ENTRYPOINT ["./start.sh"]
+CMD ["gunicorn", "fine_project.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "--timeout", "120", "--workers", "3"]

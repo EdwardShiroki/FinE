@@ -42,7 +42,7 @@ urlpatterns = [
     path('groups/group/add_to_group/<int:group_id>', views.add_to_group_page, name='add_to_group'),
     path('groups/group/remove_from_the_group/<int:group_id>',
          views.remove_from_the_group_page, name='remove_from_the_group'),
-    path('theme/change/', views.theme_change),
+    path('theme/change/', views.theme_change, name='theme_change'),
     path('reports/my_reports/', views.my_reports_page, name='my_reports'),
     path('reports/my_reports/create/report', views.create_report_page, name='create_report'),
     path('reports/my_reports/report/<int:report_id>', views.report_page, name='report'),
@@ -51,6 +51,6 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    re_path(r"^media/(?P<path>.*)$", views.media_file),
-    re_path(r"^fine/static/(?P<path>.*)$", views.static_file),
+    re_path(r"^media/(?P<path>.*)$", views.media_file, name='media_file'),
+    re_path(r"^fine/static/(?P<path>.*)$", views.static_file, name='static_file'),
 ]

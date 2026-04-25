@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,6 +25,12 @@ SECRET_KEY = 'django-insecure-@9b_x4t*d+ck!d9zgo%fr^-(l$!)6-@bnka(&#ex83%xpc!g6s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not bool(os.environ.get("debug", True) == "False")
 # DEBUG = False
+
+DB_NAME = os.environ.get("DB_NAME", "mydb")
+DB_USER = os.environ.get("DB_USER", "chudo")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
+DB_HOST = os.environ.get("DB_HOST", "db")
+DB_PORT = os.environ.get("DB_PORT", "5432")
 
 ALLOWED_HOSTS = [
     "fine.stylelifeweb.su",
@@ -63,6 +70,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'fine.middleware.endpoint_cache_middleware',
     'fine.middleware.async_not_found_page_middleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -104,11 +112,12 @@ DATABASES = {
 
 if not DEBUG:
     DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydb',
-        'USER': 'chudo',
-        'PASSWORD': 'password',
-        'HOST': 'db',
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 
 # Password validation
@@ -158,6 +167,113 @@ LOGOUT_REDIRECT_URL = '/'
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 AUTH_USER_MODEL = 'fine.User'
+
+
+def env_int(name, default):
+    return int(os.environ.get(name, default))
+
+
+IS_TEST_RUN = "test" in sys.argv
+CACHE_REDIS_URL = os.environ.get("CACHE_REDIS_URL", "redis://redis:6379/1")
+
+if IS_TEST_RUN:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "fine-tests-cache",
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": CACHE_REDIS_URL,
+            "KEY_PREFIX": "fine",
+            "TIMEOUT": None,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+                "IGNORE_EXCEPTIONS": True,
+                "SOCKET_CONNECT_TIMEOUT": 2,
+                "SOCKET_TIMEOUT": 2,
+                "CONNECTION_POOL_KWARGS": {
+                    "max_connections": 100,
+                    "retry_on_timeout": True,
+                },
+            },
+        }
+    }
+
+ENDPOINT_CACHE_GLOBAL_NAMESPACES = ("theme",)
+ENDPOINT_CACHE_TIMEOUTS = {
+    "index": env_int("CACHE_TTL_INDEX", 60),
+    "error": env_int("CACHE_TTL_ERROR", 15),
+    "profile": env_int("CACHE_TTL_PROFILE", 30),
+    "login": env_int("CACHE_TTL_LOGIN", 30),
+    "logout": env_int("CACHE_TTL_LOGOUT", 0),
+    "menu": env_int("CACHE_TTL_MENU", 30),
+    "feed": env_int("CACHE_TTL_FEED", 30),
+    "event_create": env_int("CACHE_TTL_EVENT_CREATE", 15),
+    "event_edit": env_int("CACHE_TTL_EVENT_EDIT", 15),
+    "event_commit": env_int("CACHE_TTL_EVENT_COMMIT", 0),
+    "event_group_commit": env_int("CACHE_TTL_EVENT_GROUP_COMMIT", 0),
+    "register": env_int("CACHE_TTL_REGISTER", 30),
+    "edition_about": env_int("CACHE_TTL_EDITION_ABOUT", 15),
+    "event": env_int("CACHE_TTL_EVENT", 30),
+    "friends": env_int("CACHE_TTL_FRIENDS", 15),
+    "search_friends": env_int("CACHE_TTL_SEARCH_FRIENDS", 15),
+    "create_group": env_int("CACHE_TTL_CREATE_GROUP", 15),
+    "groups": env_int("CACHE_TTL_GROUPS", 30),
+    "group": env_int("CACHE_TTL_GROUP", 30),
+    "add_to_group": env_int("CACHE_TTL_ADD_TO_GROUP", 15),
+    "remove_from_the_group": env_int("CACHE_TTL_REMOVE_FROM_THE_GROUP", 15),
+    "theme_change": env_int("CACHE_TTL_THEME_CHANGE", 0),
+    "my_reports": env_int("CACHE_TTL_MY_REPORTS", 15),
+    "create_report": env_int("CACHE_TTL_CREATE_REPORT", 15),
+    "report": env_int("CACHE_TTL_REPORT", 15),
+    "verify_report": env_int("CACHE_TTL_VERIFY_REPORT", 15),
+    "unverifed_reports": env_int("CACHE_TTL_UNVERIFED_REPORTS", 15),
+    "static_file": env_int("CACHE_TTL_STATIC_FILE", 300),
+    "media_file": env_int("CACHE_TTL_MEDIA_FILE", 60),
+}
+ENDPOINT_CACHE_NAMESPACES = {
+    "index": ("events",),
+    "profile": ("profiles", "events", "friends"),
+    "menu": ("events",),
+    "feed": ("events", "recommendations"),
+    "event_create": ("events",),
+    "event_edit": ("events",),
+    "event_commit": ("events", "recommendations"),
+    "event_group_commit": ("events", "groups", "recommendations"),
+    "edition_about": ("profiles",),
+    "event": ("events", "friends"),
+    "friends": ("friends",),
+    "search_friends": ("friends",),
+    "create_group": ("groups",),
+    "groups": ("groups",),
+    "group": ("groups",),
+    "add_to_group": ("groups", "friends"),
+    "remove_from_the_group": ("groups",),
+    "my_reports": ("reports",),
+    "create_report": ("reports",),
+    "report": ("reports",),
+    "verify_report": ("reports",),
+    "unverifed_reports": ("reports",),
+    "static_file": ("static",),
+    "media_file": ("media",),
+}
+ENDPOINT_CSRF_CACHE_ROUTES = {
+    "login",
+    "register",
+    "event_create",
+    "event_edit",
+    "edition_about",
+    "create_group",
+    "add_to_group",
+    "remove_from_the_group",
+    "create_report",
+    "verify_report",
+}
 
 # Checking those who are too lazy to indicate the correct SECRET_KEY
 if SECRET_KEY == 'Insert secret key here and uncomment this variable':

@@ -1,5 +1,51 @@
 # Итоговый проект - поиск ивентов
 
+## Kubernetes stack
+
+Локальный production-like запуск теперь идёт через `docker compose` + `k3s`.
+
+```bash
+docker compose up -d --build
+```
+
+Что поднимается:
+
+- локальный registry для backend-образа
+- `k3s` single-node cluster
+- общий PostgreSQL и общий Redis внутри Kubernetes
+- `fine-backend` Deployment с `1` pod по умолчанию
+- `HorizontalPodAutoscaler`, который масштабирует backend вверх и вниз
+
+Точка входа остаётся прежней:
+
+```text
+http://127.0.0.1:8001
+```
+
+Полезные команды:
+
+```bash
+./tools/kubectl.sh get pods -n fine
+./tools/kubectl.sh get hpa -n fine
+./tools/seed_demo_data_k8s.sh 1000
+```
+
+### Почему такие настройки HPA
+
+Порог HPA выбран на основе последних `wrk`-отчётов из `stress_tests/results`:
+
+- `load`: `796.79 rps`, `84.64 ms`, `332.66%` CPU
+- `stress`: `317.17 rps`, `796.72 ms`, `332.67%` CPU, таймауты и `14318` non-2xx/3xx ответов
+
+Из этого видно, что backend под нагрузкой быстро упирается в CPU, а агрессивный профиль сразу деградирует по latency. Поэтому:
+
+- стартуем с `1` replica
+- даём pod `request=500m`, `limit=3 CPU`
+- масштабируем по `CPU 60%`, потому что `wrk`-профили упираются именно в CPU
+- scale down делаем с окном стабилизации `60s`, чтобы убрать лишние pod'ы после спада, но не дёргать их каждую секунду
+- `maxReplicas` выставлен в `1000`, потому что API `HorizontalPodAutoscaler` требует конечное значение и настоящего `infinity` там нет
+- Redis и PostgreSQL остаются общими сервисами для всех backend pod'ов
+
 
 
 ### Инструкция по настройке проекта:
@@ -201,4 +247,3 @@
    ```bash
    gunicorn fine_project.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --timeout 120 --workers 3
    ```
-
