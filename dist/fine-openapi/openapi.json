@@ -1,0 +1,1979 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FinE Web OpenAPI",
+    "version": "1.0.0",
+    "summary": "Standalone OpenAPI description of the custom HTTP interface exposed by the FinE Django project.",
+    "description": "This spec documents the custom routes declared in `fine_project/urls.py` and implemented in `fine.views`.\n\nNotes:\n- The project is primarily a server-rendered Django web application, so most successful responses are `text/html`, not JSON.\n- Authentication is session-based via Django cookies (`sessionid`). State-changing requests also require a valid CSRF token in real browser flows.\n- Built-in Django admin routes, static files, and media file serving are intentionally omitted from this spec.\n- Some handlers return an error template with HTTP 200 instead of a 4xx status. Those quirks are described inline where relevant.",
+    "contact": {
+      "name": "Generated from repository source"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000",
+      "description": "Local Django development server"
+    },
+    {
+      "url": "http://localhost:8000",
+      "description": "Local Django development server via localhost"
+    },
+    {
+      "url": "http://127.0.0.1:8001",
+      "description": "Docker Compose published port from README and docker-compose.yaml"
+    },
+    {
+      "url": "https://fine.stylelifeweb.su",
+      "description": "Configured production host in settings.py"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Public",
+      "description": "Routes available without authentication."
+    },
+    {
+      "name": "Auth",
+      "description": "Login, logout, and registration flow."
+    },
+    {
+      "name": "Events",
+      "description": "Event discovery, detail view, and attendance flow."
+    },
+    {
+      "name": "Recommendations",
+      "description": "Personal recommendation feed."
+    },
+    {
+      "name": "Profile",
+      "description": "Public profile pages and profile editing."
+    },
+    {
+      "name": "Friends",
+      "description": "Friend search, requests, and friendship management."
+    },
+    {
+      "name": "Groups",
+      "description": "User group creation and membership management."
+    },
+    {
+      "name": "Reports",
+      "description": "User report creation and moderator verification flow."
+    },
+    {
+      "name": "UI",
+      "description": "Small UI-specific endpoints such as theme switching."
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "sessionAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid",
+        "description": "Django authenticated session cookie."
+      }
+    },
+    "parameters": {
+      "CodeParam": {
+        "name": "code",
+        "in": "path",
+        "required": true,
+        "description": "User ID from the custom `fine.User` model.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "EventIdParam": {
+        "name": "event_id",
+        "in": "path",
+        "required": true,
+        "description": "Event ID.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "GroupIdParam": {
+        "name": "group_id",
+        "in": "path",
+        "required": true,
+        "description": "User group ID.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "ReportIdParam": {
+        "name": "report_id",
+        "in": "path",
+        "required": true,
+        "description": "Report ID.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "LoginNextParam": {
+        "name": "next",
+        "in": "query",
+        "required": false,
+        "description": "Optional redirect target after successful login.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "GroupsActionParam": {
+        "name": "action",
+        "in": "query",
+        "required": true,
+        "description": "Page mode. `watch` shows owned/member groups, `invite` shows the current user's groups as invite sources for a specific event.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "watch",
+            "invite"
+          ]
+        }
+      },
+      "GroupsEventIdQueryParam": {
+        "name": "event_id",
+        "in": "query",
+        "required": false,
+        "description": "Required when `action=invite`.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "CsrfHeader": {
+        "name": "X-CSRFToken",
+        "in": "header",
+        "required": false,
+        "description": "CSRF header used by the JavaScript `fetch()` handlers for JSON requests.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "HtmlPage": {
+        "description": "HTML page rendered successfully.",
+        "content": {
+          "text/html": {
+            "schema": {
+              "type": "string",
+              "description": "HTML page rendered by a Django template."
+            }
+          }
+        }
+      },
+      "ErrorTemplatePage": {
+        "description": "HTML error template rendered. In several places the application uses an error page with HTTP 200.",
+        "content": {
+          "text/html": {
+            "schema": {
+              "type": "string",
+              "description": "HTML page rendered by a Django template."
+            }
+          }
+        }
+      },
+      "Redirect": {
+        "description": "Redirect to another page.",
+        "headers": {
+          "Location": {
+            "description": "Absolute or relative redirect target.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LoginRedirect": {
+        "description": "Redirect to the login page. Django usually appends a `next` query parameter.",
+        "headers": {
+          "Location": {
+            "description": "Absolute or relative redirect target.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ThemeChanged": {
+        "description": "Theme toggled for the authenticated user.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ThemeChangeResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "EntertainmentType": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "description": "Event category: 0 sport, 1 meeting, 2 game, 3 entertainment."
+      },
+      "EventVisibilityType": {
+        "type": "integer",
+        "enum": [
+          0,
+          1
+        ],
+        "description": "Event visibility: 0 private, 1 public."
+      },
+      "MenuFilterForm": {
+        "type": "object",
+        "properties": {
+          "entertainment_type": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  0,
+                  1,
+                  2,
+                  3
+                ]
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "-1",
+                  "0",
+                  "1",
+                  "2",
+                  "3"
+                ]
+              }
+            ],
+            "description": "`-1` means no filter."
+          }
+        },
+        "required": [
+          "entertainment_type"
+        ]
+      },
+      "LoginForm": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          },
+          "next": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "RegistrationForm": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "first_name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password1": {
+            "type": "string",
+            "format": "password"
+          },
+          "password2": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": [
+          "username",
+          "first_name",
+          "last_name",
+          "email",
+          "password1",
+          "password2"
+        ]
+      },
+      "EventForm": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "type": {
+            "$ref": "#/components/schemas/EventVisibilityType"
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "start_day": {
+            "type": "string",
+            "format": "date"
+          },
+          "finish_day": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "entertainment_type": {
+            "$ref": "#/components/schemas/EntertainmentType"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "address",
+          "start_day",
+          "finish_day",
+          "description",
+          "entertainment_type"
+        ]
+      },
+      "ProfileEditForm": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "first_name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "last_name": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          },
+          "avatar-clear": {
+            "type": "boolean",
+            "description": "When true, Django clears the current avatar."
+          }
+        },
+        "required": [
+          "username",
+          "first_name",
+          "last_name",
+          "email"
+        ]
+      },
+      "ProfileRelationActionForm": {
+        "type": "object",
+        "properties": {
+          "button": {
+            "type": "string",
+            "enum": [
+              "friend_button",
+              "del_request",
+              "del_friend",
+              "acp_friend"
+            ]
+          }
+        },
+        "required": [
+          "button"
+        ]
+      },
+      "FriendsActionForm": {
+        "type": "object",
+        "description": "Send exactly one action field per request.",
+        "properties": {
+          "cancel_to_request": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "accept_from_request": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "cancel_from_request": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "del_friend": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "SearchFriendsForm": {
+        "type": "object",
+        "properties": {
+          "search": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "friend_button": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Target user ID for a new friend request."
+          }
+        },
+        "description": "Either submit `search` to filter users or `friend_button` to send a friend request."
+      },
+      "CreateGroupForm": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 15
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "title",
+          "description"
+        ]
+      },
+      "GroupAddMembersForm": {
+        "type": "object",
+        "properties": {
+          "search": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "invite": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Friend user ID to add to the group."
+          }
+        },
+        "description": "Either submit `search` to filter candidates or `invite` to add a friend."
+      },
+      "GroupRemoveMembersForm": {
+        "type": "object",
+        "properties": {
+          "search": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "delete": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "User ID to remove from the group."
+          }
+        },
+        "description": "Either submit `search` to filter current members or `delete` to remove a member."
+      },
+      "GroupPageActionForm": {
+        "type": "object",
+        "properties": {
+          "del": {
+            "type": "string",
+            "enum": [
+              "del",
+              "user"
+            ],
+            "description": "`del` deletes the group, `user` removes the current user from the group."
+          }
+        },
+        "required": [
+          "del"
+        ]
+      },
+      "EventAttendanceRequest": {
+        "type": "object",
+        "properties": {
+          "going": {
+            "type": "boolean",
+            "description": "When true, the current user leaves the event. When false, the request follows the join flow via redirect."
+          }
+        },
+        "required": [
+          "going"
+        ]
+      },
+      "ThemeChangeResponse": {
+        "type": "object",
+        "properties": {
+          "details": {
+            "type": "string",
+            "const": "ok"
+          }
+        },
+        "required": [
+          "details"
+        ]
+      },
+      "CreateReportForm": {
+        "type": "object",
+        "properties": {
+          "report_text": {
+            "type": "string",
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "report_text"
+        ]
+      },
+      "VerifyReportForm": {
+        "type": "object",
+        "properties": {
+          "answer_text": {
+            "type": "string",
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "answer_text"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Public"
+        ],
+        "summary": "Landing page",
+        "description": "Shows the start page and up to three public events (`Event.type == 1`).",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          }
+        }
+      }
+    },
+    "/error/": {
+      "get": {
+        "tags": [
+          "Public"
+        ],
+        "summary": "Generic error page",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ErrorTemplatePage"
+          }
+        }
+      }
+    },
+    "/login/": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Render login form",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/LoginNextParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Authenticate user",
+        "description": "Django built-in `LoginView` using the stock authentication form.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login form re-rendered with validation errors.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "HTML page rendered by a Django template."
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Successful login redirect to `/`, or to `next` when supplied.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout/": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout via GET",
+        "deprecated": true,
+        "description": "Available in Django 4.1.4 but deprecated by Django 4.1 release notes. The project menu still links to this URL directly.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Successful logout redirect to `/`.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout current user",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Successful logout redirect to `/`.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registration/": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Render registration form",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registration form re-rendered with validation errors.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "HTML page rendered by a Django template."
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Successful registration redirect to `/`.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/menu/": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Browse public events",
+        "description": "Lists active public events. If the user is authenticated, the page also includes private events the user is already a member of.",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Filter events by category",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuFilterForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          }
+        }
+      }
+    },
+    "/feed/": {
+      "get": {
+        "tags": [
+          "Recommendations"
+        ],
+        "summary": "Open personalized recommendation feed",
+        "description": "Requires login. If recommendations do not exist yet, the server generates them lazily before rendering the page.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Recommendations"
+        ],
+        "summary": "Filter recommendation feed by category",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuFilterForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      }
+    },
+    "/menu/event/create/": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Render create-event form",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Create event",
+        "description": "Creates an event and redirects to the attendance-join endpoint for the newly created event. The server additionally validates that `finish_day >= start_day`.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/EventForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Form re-rendered with validation errors or date-order error message.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "HTML page rendered by a Django template."
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Successful creation redirect to `/menu/event/commit/{event_id}`.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/menu/event/edit/{event_id}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Render edit-event form",
+        "description": "Requires login. Current implementation does not verify that the current user is the event author.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EventIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Update event",
+        "description": "Requires login. The view saves changes in place and re-renders the same page.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EventIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/EventForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      }
+    },
+    "/menu/event/commit/{event_id}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Join event",
+        "description": "Adds the current user to `event_members` and redirects back to the event page. The current implementation allows joining by direct ID lookup.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EventIdParam"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to `/menu/event/{event_id}` after joining.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/menu/event/commit/group/{event_id}/{group_id}": {
+      "get": {
+        "tags": [
+          "Events",
+          "Groups"
+        ],
+        "summary": "Invite a whole group to an event",
+        "description": "Adds each group member to the event and redirects back to the event page. Due to the current condition in code, this only succeeds when the requester is both the event author and the group founder.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EventIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the event page on success, or `/` when the permission check fails.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/menu/event/{event_id}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Open event detail page",
+        "description": "Requires login. Private events are only visible when the current user is already in the event member list.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EventIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "summary": "Toggle event attendance via AJAX",
+        "description": "JSON endpoint used by `fine/static/js/event.js`. Send `going=true` to leave the event or `going=false` to follow the join flow.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EventIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventAttendanceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect to `/menu/event/commit/{event_id}` when joining.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/{code}": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Open public profile page",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CodeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "404": {
+            "description": "Raised only when the target user does not exist.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "description": "HTML page rendered by a Django template."
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Profile",
+          "Friends"
+        ],
+        "summary": "Change friendship state from profile page",
+        "description": "Rendered only for authenticated users in the template. The view itself is not decorated with `login_required`, so non-browser anonymous POSTs are not part of the supported flow.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CodeParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileRelationActionForm"
+              },
+              "examples": {
+                "sendRequest": {
+                  "value": {
+                    "button": "friend_button"
+                  }
+                },
+                "acceptRequest": {
+                  "value": {
+                    "button": "acp_friend"
+                  }
+                },
+                "deleteFriend": {
+                  "value": {
+                    "button": "del_friend"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect back to `/profile/{code}` after the action.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/edit/about": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Render profile edit form",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Update profile",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileEditForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to the authenticated user's profile after save.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/friends/": {
+      "get": {
+        "tags": [
+          "Friends"
+        ],
+        "summary": "Open friends dashboard",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Friends"
+        ],
+        "summary": "Manage friend requests or friendships",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/FriendsActionForm"
+              },
+              "examples": {
+                "acceptIncoming": {
+                  "value": {
+                    "accept_from_request": 7
+                  }
+                },
+                "cancelIncoming": {
+                  "value": {
+                    "cancel_from_request": 7
+                  }
+                },
+                "cancelOutgoing": {
+                  "value": {
+                    "cancel_to_request": 9
+                  }
+                },
+                "deleteFriend": {
+                  "value": {
+                    "del_friend": 3
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect back to `/friends/`.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search_friends/": {
+      "get": {
+        "tags": [
+          "Friends"
+        ],
+        "summary": "Render friend search page",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Friends"
+        ],
+        "summary": "Search users or send a friend request",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchFriendsForm"
+              },
+              "examples": {
+                "searchByName": {
+                  "value": {
+                    "search": "ivan"
+                  }
+                },
+                "sendRequest": {
+                  "value": {
+                    "friend_button": 12
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect back to `/search_friends/` after sending a request.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/create_group/": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Render create-group form",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Create group",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect to `/groups/group/{group_id}/` for the new group.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "List groups or show invite source groups",
+        "description": "Requires query parameter `action`. When `action=invite`, `event_id` should also be provided. Invalid or missing values render the generic error template instead of a dedicated 4xx response.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupsActionParam"
+          },
+          {
+            "$ref": "#/components/parameters/GroupsEventIdQueryParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      }
+    },
+    "/groups/group/{group_id}/": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Open group page",
+        "description": "Accessible to the group founder or existing members only. Other users are redirected to `/groups/`.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect to `/groups/` when the user is not allowed to view the group.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Delete group or leave group",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupPageActionForm"
+              },
+              "examples": {
+                "deleteGroup": {
+                  "value": {
+                    "del": "del"
+                  }
+                },
+                "leaveGroup": {
+                  "value": {
+                    "del": "user"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to `/groups/` after the action.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/group/add_to_group/{group_id}": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Render add-members page",
+        "description": "Only the group founder can access this page. Other users receive the generic error template.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Search candidates or add a member to the group",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupAddMembersForm"
+              },
+              "examples": {
+                "searchByName": {
+                  "value": {
+                    "search": "alex"
+                  }
+                },
+                "inviteById": {
+                  "value": {
+                    "invite": 5
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect back to the same page after a user is added.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/groups/group/remove_from_the_group/{group_id}": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Render remove-members page",
+        "description": "Only the group founder can access this page. Other users receive the generic error template.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Search current members or remove a member from the group",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupRemoveMembersForm"
+              },
+              "examples": {
+                "searchByName": {
+                  "value": {
+                    "search": "maria"
+                  }
+                },
+                "deleteById": {
+                  "value": {
+                    "delete": 8
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect back to the same page after a user is removed.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/theme/change/": {
+      "post": {
+        "tags": [
+          "UI"
+        ],
+        "summary": "Toggle current user's theme",
+        "description": "AJAX endpoint used by `fine/static/js/theme.js`. The request body is empty; authentication and CSRF cookie/header are still required in real usage.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CsrfHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ThemeChanged"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      }
+    },
+    "/reports/my_reports/": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "List current user's reports",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      }
+    },
+    "/reports/my_reports/create/report": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Render report-creation form",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Create a user report",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect to `/reports/my_reports/report/{report_id}` after creation.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/my_reports/report/{report_id}": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Open a report created by the current user",
+        "description": "Shows the report only when the current user is the report author. Otherwise the generic error template is rendered.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ReportIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect to `my_profile/my_reports/` when the report does not exist.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/unverifed_reports": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "List unverified reports for moderators",
+        "description": "Accessible to superusers only. Non-superusers receive the generic error template.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "$ref": "#/components/responses/LoginRedirect"
+          }
+        }
+      }
+    },
+    "/reports/verify/report/{report_id}": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Render moderator response form",
+        "description": "Accessible to superusers only. If the report is already closed, the view redirects back to `/reports/unverifed_reports`.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ReportIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect to `/reports/unverifed_reports`.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Answer and close a report",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ReportIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyReportForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HtmlPage"
+          },
+          "302": {
+            "description": "Redirect to `/reports/unverifed_reports` after saving the answer.",
+            "headers": {
+              "Location": {
+                "description": "Absolute or relative redirect target.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

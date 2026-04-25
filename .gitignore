@@ -28,7 +28,6 @@ media/*
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -76,6 +75,7 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+fine-docs-html.zip
 
 # PyBuilder
 target/
@@ -239,6 +239,12 @@ fabric.properties
 .idea/
 
 # Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-249601023
+stress_tests/results/load/*
+!stress_tests/results/load/.gitkeep
+stress_tests/results/stress/*
+!stress_tests/results/stress/.gitkeep
+stress_tests/results/graphs/*
+!stress_tests/results/graphs/.gitkeep
 
 *.iml
 modules.xml

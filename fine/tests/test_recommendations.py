@@ -1,7 +1,8 @@
 from datetime import timedelta
 
+from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import AsyncClient, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -10,7 +11,7 @@ from fine.models import Event, UserRecommendation
 
 class FeedRecommendationsTestCase(TestCase):
     def setUp(self):
-        self.client = Client()
+        self.client = AsyncClient()
         user_model = get_user_model()
 
         self.viewer = user_model.objects.create_user(
@@ -36,14 +37,22 @@ class FeedRecommendationsTestCase(TestCase):
             author=self.author,
         )
 
-    def test_feed_triggers_generation_when_user_has_no_recommendations(self):
-        self.client.force_login(self.viewer)
-        self.assertFalse(UserRecommendation.objects.filter(user=self.viewer).exists())
+    async def test_feed_triggers_generation_when_user_has_no_recommendations(self):
+        await sync_to_async(self.client.force_login, thread_sensitive=True)(self.viewer)
+        self.assertFalse(
+            await sync_to_async(
+                lambda: UserRecommendation.objects.filter(user=self.viewer).exists(),
+                thread_sensitive=True,
+            )()
+        )
 
-        response = self.client.get(reverse("feed"))
+        response = await self.client.get(reverse("feed"))
 
         self.assertEqual(response.status_code, 200)
-        recommendations = UserRecommendation.objects.filter(user=self.viewer)
-        self.assertTrue(recommendations.exists())
-        self.assertEqual(recommendations.first().event_id, self.event.id)
+        recommendations = await sync_to_async(
+            lambda: list(UserRecommendation.objects.filter(user=self.viewer).order_by("rank")),
+            thread_sensitive=True,
+        )()
+        self.assertTrue(recommendations)
+        self.assertEqual(recommendations[0].event_id, self.event.id)
         self.assertGreater(response.context["recommendations_size"], 0)

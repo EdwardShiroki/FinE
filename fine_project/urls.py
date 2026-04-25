@@ -13,31 +13,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf.urls.static import static
-from django.contrib import admin
-from django.urls import path, include
-from django.contrib.auth import views as auth_views
+from django.urls import path, re_path
 
 from fine_project import settings
 from fine import views
-from fine.views import get_context
-
-handler404 = "fine.views.profile_view_page"
-
-context_for_login = get_context(page_name="\u0410\u0432\u0442\u043e\u0440\u0438\u0437\u0430\u0446\u0438\u044f", active="/login/")
-context_for_login["menu"]["right"]["unauthorized"][1] = {'url_name': '/login/', 'name': '\u0412\u043e\u0439\u0442\u0438'}
 
 urlpatterns = [
     path('', views.index_page, name='index'),
-    path('admin/', admin.site.urls),
     path('error/', views.error_page, name="error"),
     path('profile/<int:code>', views.profile_view_page, name='profile'),
-    path('login/',
-         auth_views.LoginView.as_view(
-             extra_context=context_for_login
-         ),
-         name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('login/', views.login_page, name='login'),
+    path('logout/', views.logout_page, name='logout'),
     path('menu/', views.menu_page, name='menu'),
     path('feed/', views.feed_page, name='feed'),
     path('menu/event/create/', views.event_create_page, name='event_create'),
@@ -62,9 +48,9 @@ urlpatterns = [
     path('reports/my_reports/report/<int:report_id>', views.report_page, name='report'),
     path('reports/verify/report/<int:report_id>', views.verify_report_page, name='verify_report'),
     path('reports/unverifed_reports', views.unverifed_reports_page, name='unverifed_reports'),
-    # path('__debug__/', include('debug_toolbar.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", views.media_file),
+    re_path(r"^fine/static/(?P<path>.*)$", views.static_file),
+]

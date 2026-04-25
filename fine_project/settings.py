@@ -29,6 +29,7 @@ ALLOWED_HOSTS = [
     "fine.stylelifeweb.su",
     "127.0.0.1",
     "localhost",
+    "testserver",
 ]
 
 YANDEX_MAPS_API_KEY = os.environ.get(
@@ -45,7 +46,6 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -63,6 +63,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'fine.middleware.async_not_found_page_middleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -89,7 +90,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'fine_project.wsgi.application'
 ASGI_APPLICATION = 'fine_project.asgi.application'
 
 # Database
@@ -149,9 +149,6 @@ USE_TZ = True
 
 STATIC_URL = '/fine/static/'
 MEDIA_URL = '/media/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'fine/static'),
-]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = "/var/static"
 LOGIN_URL = '/login/'

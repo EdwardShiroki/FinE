@@ -1,26 +1,33 @@
-version: '2'
 services:
   db:
-    image: bitnami/postgresql:latest
+    image: postgres:16-alpine
     hostname: db
     volumes:
-      - 'fine_db:/bitnami/postgresql'
+      - 'fine_db:/var/lib/postgresql/data'
     environment:
-      - POSTGRES_USER=chudo
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=mydb
+      POSTGRES_USER: chudo
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chudo -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   back:
-    image: urtanto/fine:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     hostname: back
+    environment:
+      debug: "False"
     volumes:
       - '/var/media:/proj/media'
-      - '/var/static:/proj/fine/static'
+      - '/var/static:/var/static'
     ports:
       - "8001:8000"
-    links:
-      - db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 volumes:
   fine_db:

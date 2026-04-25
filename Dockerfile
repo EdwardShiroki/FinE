@@ -4,11 +4,13 @@ LABEL authors="urtanto"
 RUN mkdir proj
 WORKDIR /proj
 
-ENV PYTHONUNBUFFERED 1
-ENV debug "False"
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV debug=False
 
 COPY requirements.txt /proj/
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . /proj/
+RUN chmod +x /proj/start.sh
 
-ENTRYPOINT ./start.sh
+ENTRYPOINT ["./start.sh"]

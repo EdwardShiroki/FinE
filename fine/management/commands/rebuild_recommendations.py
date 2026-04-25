@@ -1,6 +1,8 @@
+import asyncio
+
 from django.core.management.base import BaseCommand
 
-from fine.services.recommendations import generate_for_all_users
+from fine.services.recommendations import agenerate_for_all_users
 
 
 class Command(BaseCommand):
@@ -17,5 +19,5 @@ class Command(BaseCommand):
         self.stdout.write(
             f"Start rebuilding recommendations: limit={limit}, batch_size={batch_size}"
         )
-        generate_for_all_users(limit=limit, batch_size=batch_size)
+        asyncio.run(agenerate_for_all_users(limit=limit, batch_size=batch_size))
         self.stdout.write(self.style.SUCCESS("Recommendations rebuilt successfully"))
