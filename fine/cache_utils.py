@@ -14,6 +14,9 @@ _CACHE_KEY_PREFIX = "endpoint-cache"
 _CACHE_VERSION_PREFIX = f"{_CACHE_KEY_PREFIX}:version"
 _CACHEABLE_METHODS = {"GET", "HEAD"}
 _CACHEABLE_STATUS_CODES = {200, 404}
+SESSION_CACHE_SCOPE_USER_ID_KEY = "endpoint_cache_user_id"
+SESSION_CACHE_SCOPE_THEME_KEY = "endpoint_cache_theme"
+SESSION_CACHE_SCOPE_SUPERUSER_KEY = "endpoint_cache_superuser"
 
 
 def resolve_route_name(request: HttpRequest) -> str | None:
@@ -45,15 +48,45 @@ def get_route_cache_namespaces(route_name: str | None) -> tuple[str, ...]:
 
 
 def _build_authenticated_scope(request: HttpRequest) -> str:
+    session = request.session
+    user_id = session.get(SESSION_CACHE_SCOPE_USER_ID_KEY)
+    if user_id is not None:
+        session_key = session.session_key or "anonymous-session"
+        theme = session.get(SESSION_CACHE_SCOPE_THEME_KEY, "white")
+        is_superuser = int(bool(session.get(SESSION_CACHE_SCOPE_SUPERUSER_KEY, False)))
+        return f"user:{user_id}:session:{session_key}:theme:{theme}:super:{is_superuser}"
+
     user = request.user
-    if not user.is_authenticated:
+    if not getattr(user, "is_authenticated", False):
         return "anonymous"
 
-    session_key = request.session.session_key or "anonymous-session"
+    session_key = session.session_key or "anonymous-session"
     return (
         f"user:{user.id}:session:{session_key}:"
         f"theme:{getattr(user, 'theme', 'white')}:super:{int(user.is_superuser)}"
     )
+
+
+def sync_session_cache_scope(request: HttpRequest, user):
+    request.session[SESSION_CACHE_SCOPE_USER_ID_KEY] = str(user.id)
+    request.session[SESSION_CACHE_SCOPE_THEME_KEY] = getattr(user, "theme", "white")
+    request.session[SESSION_CACHE_SCOPE_SUPERUSER_KEY] = bool(getattr(user, "is_superuser", False))
+    request.session.modified = True
+
+
+def sync_session_cache_theme(request: HttpRequest, theme: str):
+    request.session[SESSION_CACHE_SCOPE_THEME_KEY] = theme
+    request.session.modified = True
+
+
+def clear_session_cache_scope(request: HttpRequest):
+    for key in (
+        SESSION_CACHE_SCOPE_USER_ID_KEY,
+        SESSION_CACHE_SCOPE_THEME_KEY,
+        SESSION_CACHE_SCOPE_SUPERUSER_KEY,
+    ):
+        request.session.pop(key, None)
+    request.session.modified = True
 
 
 async def build_cache_scope(request: HttpRequest, route_name: str | None) -> str:

@@ -17,7 +17,12 @@ from django.template.defaultfilters import register
 from django.urls import reverse
 from django.utils._os import safe_join
 
-from fine.cache_utils import invalidate_route_caches
+from fine.cache_utils import (
+    clear_session_cache_scope,
+    invalidate_route_caches,
+    sync_session_cache_scope,
+    sync_session_cache_theme,
+)
 from fine.forms import (
     CreateEvent,
     CreateGroup,
@@ -257,7 +262,9 @@ async def login_page(request: HttpRequest):
 
     form = AuthenticationForm(request=request, data=request.POST or None)
     if request.method == "POST" and await _async_form_is_valid(form):
-        await sync_to_async(auth_login, thread_sensitive=True)(request, form.get_user())
+        user = form.get_user()
+        await sync_to_async(auth_login, thread_sensitive=True)(request, user)
+        await sync_to_async(sync_session_cache_scope, thread_sensitive=True)(request, user)
         return await _async_redirect(next_url or settings.LOGIN_REDIRECT_URL)
 
     context["form"] = form
@@ -266,6 +273,7 @@ async def login_page(request: HttpRequest):
 
 
 async def logout_page(request: HttpRequest):
+    await sync_to_async(clear_session_cache_scope, thread_sensitive=True)(request)
     await sync_to_async(auth_logout, thread_sensitive=True)(request)
     return await _async_redirect(settings.LOGOUT_REDIRECT_URL)
 
@@ -275,7 +283,8 @@ async def theme_change(request: HttpRequest):
     if auth_redirect:
         return auth_redirect
 
-    await queries.update_user_theme(request.user)
+    new_theme = await queries.update_user_theme(request.user)
+    await sync_to_async(sync_session_cache_theme, thread_sensitive=True)(request, new_theme)
     await _invalidate_cache(extra_namespaces=("theme",))
     return JsonResponse({"details": "ok"})
 

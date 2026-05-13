@@ -192,7 +192,6 @@ else:
             "TIMEOUT": None,
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
                 "IGNORE_EXCEPTIONS": True,
                 "SOCKET_CONNECT_TIMEOUT": 2,
                 "SOCKET_TIMEOUT": 2,
@@ -203,6 +202,9 @@ else:
             },
         }
     }
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_CACHE_ALIAS = "default"
 
 ENDPOINT_CACHE_GLOBAL_NAMESPACES = ("theme",)
 ENDPOINT_CACHE_TIMEOUTS = {
